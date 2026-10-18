@@ -21,6 +21,8 @@
   --gold: #ffd93d;
   --orb-opacity: 0.4;
   --glare: rgb(255 255 255 / 0.1);
+  --success: #4ade80; /* form feedback only */
+  --danger: #ff8787;
   --gradient-brand: linear-gradient(135deg, #ff8e53 0%, #ff6b6b 50%, #00d4ff 100%);
   color-scheme: dark;
 }
@@ -38,6 +40,8 @@
   --gold: #f59f00;
   --orb-opacity: 0.25;
   --glare: rgb(217 72 15 / 0.08);
+  --success: #237032; /* darker in light mode so text passes AA on white */
+  --danger: #c92a2a;
   color-scheme: light;
 }
 
@@ -55,6 +59,8 @@
   --color-accent-2: var(--accent-2);
   --color-coral: var(--coral);
   --color-gold: var(--gold);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

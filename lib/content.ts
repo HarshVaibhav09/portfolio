@@ -271,6 +271,40 @@ export const work = {
   stackLabel: "Tech stack",
 } as const;
 
+export const contact = {
+  intro:
+    "Hiring for a Full Stack or AI Engineer role, building something with LLMs, or curious about one of my projects? Send me a message and I will get back to you.",
+  fields: {
+    name: { label: "Name", placeholder: "Your name" },
+    email: { label: "Email", placeholder: "you@company.com" },
+    message: { label: "Message", placeholder: "What would you like to talk about?" },
+  },
+  honeypotLabel: "Leave this field empty",
+  submit: "Send message",
+  sending: "Sending...",
+  success: "Thanks, your message is on its way. I will reply to the email you entered.",
+  errors: {
+    invalid: "Please fix the highlighted fields.",
+    generic: "Something went wrong sending your message. Please try again, or email me directly.",
+    unavailable: "The form is unavailable right now. Please email me directly instead.",
+    /** {minutes} is replaced with the wait time. */
+    rateLimited: "You have sent a few messages already. Please try again in {minutes} min, or email me directly.",
+  },
+  validation: {
+    nameShort: "Please enter at least 2 characters.",
+    nameLong: "Please keep your name under 80 characters.",
+    email: "Please enter a valid email address.",
+    messageShort: "Please write at least 10 characters.",
+    messageLong: "Please keep your message under 2,000 characters.",
+  },
+  emailSubjectPrefix: "Portfolio contact from",
+} as const;
+
+export const footer = {
+  tagline: "Full Stack + AI Engineer in Bengaluru, building LLM systems and the products around them.",
+  builtWith: "Built with Next.js, React Three Fiber and Tailwind",
+} as const;
+
 const AWS_CERT = "AWS Certified Cloud Practitioner";
 
 export const about: { paragraphs: string[]; factsTitle: string; facts: Fact[] } = {

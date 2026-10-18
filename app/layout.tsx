@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { BackgroundCanvasLoader } from "@/components/background/BackgroundCanvasLoader";
+import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
 import { site } from "@/lib/content";
 import "./globals.css";
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <BackgroundCanvasLoader />
         <Navbar />
         {children}
+        <Footer />
       </body>
     </html>
   );
