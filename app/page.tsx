@@ -2,12 +2,13 @@ import { GradientOrbs } from "@/components/background/GradientOrbs";
 import { BackToTop } from "@/components/layout/BackToTop";
 import { ScrollProgress } from "@/components/layout/ScrollProgress";
 import { About } from "@/components/sections/About";
+import { Experience } from "@/components/sections/Experience";
 import { Hero } from "@/components/sections/Hero";
+import { Skills } from "@/components/sections/Skills";
+import { Work } from "@/components/sections/Work";
+import { Reveal } from "@/components/ui/Reveal";
 import { Section } from "@/components/ui/Section";
-import { nav, sections } from "@/lib/content";
-
-// Sections still to build in later phases.
-const placeholders = nav.filter(({ id }) => id !== "home" && id !== "about");
+import { sections } from "@/lib/content";
 
 export default function Home() {
   return (
@@ -17,11 +18,15 @@ export default function Home() {
       <main>
         <Hero />
         <About />
-        {placeholders.map(({ id }) => (
-          <Section key={id} id={id} {...sections[id]}>
+        <Work />
+        <Skills />
+        <Experience />
+        {/* Placeholder until the Contact phase */}
+        <Section id="contact" {...sections.contact}>
+          <Reveal>
             <div className="h-64 rounded-2xl border border-border bg-bg-alt/60 backdrop-blur-[10px]" />
-          </Section>
-        ))}
+          </Reveal>
+        </Section>
       </main>
       <BackToTop />
     </>

@@ -20,6 +20,7 @@
   --coral: #ff6b6b;
   --gold: #ffd93d;
   --orb-opacity: 0.4;
+  --glare: rgb(255 255 255 / 0.1);
   --gradient-brand: linear-gradient(135deg, #ff8e53 0%, #ff6b6b 50%, #00d4ff 100%);
   color-scheme: dark;
 }
@@ -36,6 +37,7 @@
   --coral: #e03131;
   --gold: #f59f00;
   --orb-opacity: 0.25;
+  --glare: rgb(217 72 15 / 0.08);
   color-scheme: light;
 }
 
@@ -256,5 +258,11 @@
   .hero-letter,
   .hero-rise {
     animation: none !important;
+  }
+  /* Scroll reveals (Reveal.tsx) set opacity/transform inline; !important in a stylesheet
+     wins, so reduced-motion users never see hidden content, even before hydration. */
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

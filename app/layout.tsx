@@ -33,6 +33,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        {/* Without JS the scroll reveals never run, so show everything */}
+        <noscript>
+          <style>{`[data-reveal]{opacity:1!important;transform:none!important}`}</style>
+        </noscript>
       </head>
       {/* suppressHydrationWarning: browser extensions inject attributes onto <body> */}
       <body suppressHydrationWarning>

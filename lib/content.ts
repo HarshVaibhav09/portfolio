@@ -19,7 +19,10 @@ export type UiIconKey =
 /** Keys mapped to brand logos (react-icons/si) or lucide fallbacks by social link components. */
 export type SocialIconKey = "github" | "linkedin" | "email";
 
-/** Keys mapped to react-icons/si brand logos by SkillChip. Skills without a logo omit the key. */
+/**
+ * Keys mapped to icons by SkillIcon: react-icons/si brand logos, plus generic lucide keys
+ * (the last group) for skills with no brand logo.
+ */
 export type SkillIconKey =
   | "python"
   | "cplusplus"
@@ -27,7 +30,6 @@ export type SkillIconKey =
   | "typescript"
   | "langchain"
   | "langgraph"
-  | "groq"
   | "gemini"
   | "fastapi"
   | "nodejs"
@@ -42,13 +44,24 @@ export type SkillIconKey =
   | "mongodb"
   | "sqlite"
   | "redis"
-  | "pinecone"
   | "docker"
-  | "aws"
   | "git"
   | "github"
   | "linux"
-  | "vercel";
+  | "vercel"
+  // lucide fallbacks
+  | "brain"
+  | "workflow"
+  | "sparkles"
+  | "gauge"
+  | "network"
+  | "key-round"
+  | "database"
+  | "zap"
+  | "cloud";
+
+/** Keys mapped to lucide-react icons in the Achievements cards. */
+export type AchievementIconKey = "trophy" | "code" | "award";
 
 /** Keys mapped to lucide-react icons in the About facts card. */
 export type FactIconKey = "graduation-cap" | "map-pin" | "target" | "award";
@@ -91,7 +104,11 @@ export interface Project {
   stack: string[];
   date?: string;
   featured?: boolean;
+  /** Headline numbers, shown as stat blocks on the featured card. */
+  metrics?: Stat[];
   highlights: string[];
+  /** Honest framing of my role, shown on the card. */
+  note?: string;
   links: { live?: string; code: string };
 }
 
@@ -108,7 +125,7 @@ export interface Experience {
 
 export interface Skill {
   name: string;
-  icon?: SkillIconKey;
+  icon: SkillIconKey;
 }
 
 export interface SkillGroup {
@@ -119,6 +136,7 @@ export interface SkillGroup {
 export interface Achievement {
   title: string;
   detail: string;
+  icon: AchievementIconKey;
 }
 
 export interface Fact {
@@ -243,6 +261,16 @@ export const hero = {
   scrollLabel: "Scroll to the about section",
 } as const;
 
+export const work = {
+  featuredLabel: "Featured",
+  live: "Live",
+  code: "Code",
+  liveAria: "Live demo of",
+  codeAria: "Source code of",
+  moreHeading: "More projects",
+  stackLabel: "Tech stack",
+} as const;
+
 const AWS_CERT = "AWS Certified Cloud Practitioner";
 
 export const about: { paragraphs: string[]; factsTitle: string; facts: Fact[] } = {
@@ -272,10 +300,9 @@ export const experience: Experience[] = [
     start: "Feb 2026",
     end: "Apr 2026",
     highlights: [
-      "Built an 8-node multi-agent LangGraph workflow for email triage, classification and reply generation",
+      "Built an 8-node multi-agent LangGraph workflow for email triage, classification and reply generation, cutting end-to-end email handling workload by 80%",
       "Built a RAG pipeline with Groq LLMs and Gemini embeddings over inboxes with 50+ unread threads",
       "Chose models by latency, reasoning depth and cost: Groq for low-latency replies, Gemini for reasoning-heavy drafts",
-      "Cut end-to-end email handling workload by 80%",
     ],
     ownership:
       "I owned the agent orchestration and RAG layer. The Gmail OAuth connection was built by a teammate.",
@@ -287,10 +314,9 @@ export const experience: Experience[] = [
     start: "Dec 2025",
     end: "Feb 2026",
     highlights: [
-      "Built 15+ REST APIs with Django REST Framework for auth, employee management and workflow automation",
+      "Built 15+ REST APIs with Django REST Framework for auth, employee management and workflow automation, with JWT auth and role-based access control across 10+ endpoints",
       "Designed 5+ PostgreSQL schemas across 10+ tables",
       "Built 10+ responsive React interfaces (dashboards, reporting, notifications) in a 4-member team with bi-weekly releases",
-      "Implemented JWT auth and role-based access control across 10+ endpoints",
     ],
   },
   {
@@ -301,10 +327,10 @@ export const experience: Experience[] = [
     end: "Aug 2025",
     highlights: [
       "Worked on EduNexa, a school management system (React, Node.js, Express, MongoDB), in a 5-member team",
-      "Built Node/Express REST APIs with RBAC + JWT, Redis caching, pagination and Postman testing",
       "Redis caching and pagination cut server load by 20% under concurrent traffic",
     ],
-    ownership: "I owned the backend.",
+    ownership:
+      "I owned the backend: Node/Express REST APIs, RBAC + JWT, Redis caching, pagination and Postman testing.",
   },
 ];
 
@@ -321,10 +347,14 @@ export const projects: Project[] = [
     stack: ["React", "FastAPI", "Python", "ChromaDB", "Groq", "Docker"],
     date: "July 2026",
     featured: true,
+    metrics: [
+      { value: "Sub-3s", label: "p50 query latency, live" },
+      { value: "0.74 → 0.84", label: "recall@5 with hybrid search" },
+      { value: "0.53 → 0.77", label: "exact-ID lookups" },
+      { value: "80+", label: "page PDFs at constant memory" },
+    ],
     highlights: [
-      "Sub-3-second p50 query latency, live",
-      "Hybrid search (dense embeddings + BM25 via reciprocal rank fusion): recall@5 0.74 to 0.84; exact-ID lookups 0.53 to 0.77 (50-query gold set)",
-      "Streaming chunking pipeline handles 80+ page PDFs at constant memory",
+      "Hybrid search combines dense embeddings with BM25 via reciprocal rank fusion, measured on a 50-query gold set",
       "Async background ingestion with real-time job-status tracking",
       "Voice channel: streaming speech-to-text, silence-based endpointing, neural text-to-speech with multi-provider fallback",
     ],
@@ -344,6 +374,7 @@ export const projects: Project[] = [
       "The proofreader is a separate agent, because a model checking its own output approves almost anything",
       "Bounded rewrite loop escalates to a human when the retry budget runs out",
     ],
+    note: "I owned the agent orchestration and RAG layer. The Gmail OAuth connection was built by a teammate.",
     links: { code: "https://github.com/HarshVaibhav09/MailWarden" },
   },
   {
@@ -354,8 +385,8 @@ export const projects: Project[] = [
     date: "March 2025",
     highlights: [
       "Approval flow modeled as a state machine",
-      "Rate-limited auth and ID-card verification",
       "Handles two users requesting the last copy at once",
+      "Rate-limited auth and ID-card verification",
     ],
     links: {
       live: "https://university-library-management-syste-nine.vercel.app/",
@@ -384,12 +415,12 @@ export const skillGroups: SkillGroup[] = [
     skills: [
       { name: "LangGraph", icon: "langgraph" },
       { name: "LangChain", icon: "langchain" },
-      { name: "RAG" },
-      { name: "Multi-agent orchestration" },
-      { name: "Prompt engineering" },
-      { name: "Groq", icon: "groq" },
+      { name: "RAG", icon: "brain" },
+      { name: "Multi-agent orchestration", icon: "workflow" },
+      { name: "Prompt engineering", icon: "sparkles" },
+      { name: "Groq", icon: "zap" },
       { name: "Gemini", icon: "gemini" },
-      { name: "RAGAS" },
+      { name: "RAGAS", icon: "gauge" },
     ],
   },
   {
@@ -399,9 +430,9 @@ export const skillGroups: SkillGroup[] = [
       { name: "Node.js", icon: "nodejs" },
       { name: "Express", icon: "express" },
       { name: "Django REST Framework", icon: "django" },
-      { name: "REST API design" },
+      { name: "REST API design", icon: "network" },
       { name: "Pydantic", icon: "pydantic" },
-      { name: "OAuth 2.0" },
+      { name: "OAuth 2.0", icon: "key-round" },
       { name: "JWT", icon: "jwt" },
     ],
   },
@@ -420,15 +451,15 @@ export const skillGroups: SkillGroup[] = [
       { name: "MongoDB", icon: "mongodb" },
       { name: "SQLite", icon: "sqlite" },
       { name: "Redis", icon: "redis" },
-      { name: "ChromaDB" },
-      { name: "Pinecone", icon: "pinecone" },
+      { name: "ChromaDB", icon: "database" },
+      { name: "Pinecone", icon: "database" },
     ],
   },
   {
     category: "Cloud / DevOps",
     skills: [
       { name: "Docker", icon: "docker" },
-      { name: "AWS", icon: "aws" },
+      { name: "AWS", icon: "cloud" },
       { name: "Git", icon: "git" },
       { name: "GitHub", icon: "github" },
       { name: "Linux", icon: "linux" },
@@ -442,7 +473,7 @@ export const skillGroups: SkillGroup[] = [
       { name: "C++", icon: "cplusplus" },
       { name: "JavaScript", icon: "javascript" },
       { name: "TypeScript", icon: "typescript" },
-      { name: "SQL" },
+      { name: "SQL", icon: "database" },
     ],
   },
 ];
@@ -456,13 +487,18 @@ export const achievements: Achievement[] = [
     title: "Smart India Hackathon 2025",
     detail:
       "National-level qualifier (100,000+ participants), representing NIT Jalandhar with an AI-powered solution",
+    icon: "trophy",
   },
   {
     title: "850+ problems solved",
     detail: "Across LeetCode, Codeforces and GeeksforGeeks",
+    icon: "code",
   },
   {
     title: AWS_CERT,
     detail: "Amazon Web Services",
+    icon: "award",
   },
 ];
+
+export const achievementsHeading = "Achievements";

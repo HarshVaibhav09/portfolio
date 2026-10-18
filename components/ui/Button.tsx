@@ -5,7 +5,7 @@ import { cn, isExternal } from "@/lib/utils";
 type Variant = "gradient" | "outline" | "ghost";
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium " +
+  "inline-flex items-center justify-center gap-2 rounded-full text-sm font-medium " +
   "transition-all duration-200 hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50";
 
 const variants: Record<Variant, string> = {
@@ -15,8 +15,16 @@ const variants: Record<Variant, string> = {
   ghost: "text-text hover:bg-bg-raised hover:text-accent",
 };
 
+type Size = "md" | "sm";
+
+const sizes: Record<Size, string> = {
+  md: "px-6 py-3",
+  sm: "px-4 py-2",
+};
+
 interface CommonProps {
   variant?: Variant;
+  size?: Size;
   className?: string;
   children: ReactNode;
 }
@@ -33,7 +41,7 @@ type NativeButtonProps = CommonProps &
 export type ButtonProps = LinkButtonProps | NativeButtonProps;
 
 export function Button(props: ButtonProps) {
-  const classes = cn(base, variants[props.variant ?? "gradient"], props.className);
+  const classes = cn(base, sizes[props.size ?? "md"], variants[props.variant ?? "gradient"], props.className);
 
   if (props.href !== undefined) {
     const { href, download, children, "aria-label": ariaLabel } = props;
@@ -63,7 +71,7 @@ export function Button(props: ButtonProps) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { variant, className, children, href, type = "button", ...rest } = props;
+  const { variant, size, className, children, href, type = "button", ...rest } = props;
   return (
     <button type={type} className={classes} {...rest}>
       {children}
