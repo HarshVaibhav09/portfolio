@@ -245,7 +245,7 @@ export const profile: Profile = {
   status: "Open to Full Stack + AI Engineer roles",
   greeting: "Hi, I'm",
   rotatingPrefix: "I build ",
-  rotatingWords: ["RAG pipelines", "multi-agent systems", "FastAPI backends", "React frontends"],
+  rotatingWords: ["RAG pipelines", "multi-agent systems", "FastAPI and Node.js backends", "React frontends"],
   description: site.description,
   photo: { src: "/images/harsh.jpg", alt: "Portrait of Harsh Vaibhav" },
   resume: "/resume.pdf",

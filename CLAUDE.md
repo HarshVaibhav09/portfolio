@@ -145,7 +145,7 @@ Left column, top to bottom:
 1. Status pill: "Open to Full Stack + AI Engineer roles" with a small pulsing green dot
 2. Name: "Hi, I'm Harsh Vaibhav" with the name in --gradient-text
 3. Rotating line in mono: "I build " + cycling words (RAG pipelines, multi-agent systems,
-   FastAPI backends, React frontends) with a typing effect and blinking caret
+   FastAPI and Node.js backends, React frontends) with a typing effect and blinking caret
 4. One-line description
 5. CTAs: View work (gradient, primary), Download resume (outline), Contact (ghost)
 6. Location (Bengaluru) + social icon links (GitHub, LinkedIn, Email)
