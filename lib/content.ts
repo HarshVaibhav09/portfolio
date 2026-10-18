@@ -50,6 +50,9 @@ export type SkillIconKey =
   | "linux"
   | "vercel";
 
+/** Keys mapped to lucide-react icons in the About facts card. */
+export type FactIconKey = "graduation-cap" | "map-pin" | "target" | "award";
+
 export type SectionId = "home" | "about" | "work" | "skills" | "experience" | "contact";
 
 export interface SocialLink {
@@ -116,6 +119,12 @@ export interface SkillGroup {
 export interface Achievement {
   title: string;
   detail: string;
+}
+
+export interface Fact {
+  label: string;
+  value: string;
+  icon: FactIconKey;
 }
 
 export interface NavItem {
@@ -218,6 +227,36 @@ export const profile: Profile = {
     { value: "4", label: "projects shipped" },
     { value: "3", label: "industry roles" },
     { value: "850+", label: "problems solved" },
+  ],
+};
+
+/* ------------------------------------------------------------------
+   Hero + About
+   ------------------------------------------------------------------ */
+
+export const hero = {
+  cta: {
+    work: "View work",
+    resume: "Download resume",
+    contact: "Contact",
+  },
+  scrollLabel: "Scroll to the about section",
+} as const;
+
+const AWS_CERT = "AWS Certified Cloud Practitioner";
+
+export const about: { paragraphs: string[]; factsTitle: string; facts: Fact[] } = {
+  paragraphs: [
+    "I'm a Full Stack + AI Engineer based in Bengaluru. Across three industry roles and four shipped projects, I have built things that run end to end: a document search tool for logistics teams, a multi-agent system that runs a support inbox, and a library platform with a real approval workflow.",
+    "On the AI side I work with RAG pipelines and multi-agent workflows, mostly in Python with FastAPI, LangGraph and Groq or Gemini models. I like to measure them. OpsPilot's hybrid search moved recall@5 from 0.74 to 0.84 on a 50-query gold set. On the product side I build the React and Next.js frontends, and the REST APIs, auth and databases behind them.",
+    "I'm looking for a Full Stack or AI Engineer role where I can own features end to end, from the data layer to the interface, on a team that measures what it builds. If that sounds like yours, I'd like to hear from you.",
+  ],
+  factsTitle: "Quick facts",
+  facts: [
+    { label: "Education", value: profile.education, icon: "graduation-cap" },
+    { label: "Location", value: profile.location, icon: "map-pin" },
+    { label: "Focus", value: "RAG, multi-agent systems, full stack web", icon: "target" },
+    { label: "Certification", value: AWS_CERT, icon: "award" },
   ],
 };
 
@@ -423,7 +462,7 @@ export const achievements: Achievement[] = [
     detail: "Across LeetCode, Codeforces and GeeksforGeeks",
   },
   {
-    title: "AWS Certified Cloud Practitioner",
+    title: AWS_CERT,
     detail: "Amazon Web Services",
   },
 ];

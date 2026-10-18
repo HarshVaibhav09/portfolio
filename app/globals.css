@@ -169,7 +169,73 @@
 }
 
 /* ------------------------------------------------------------------
-   7. Accessibility: respect reduced motion everywhere
+   7. Hero: headline reveal, fade-up sequence, photo ring, caret
+   ------------------------------------------------------------------ */
+@keyframes hero-letter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+@keyframes ring-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Letters hold their space from the first paint; only opacity and transform animate.
+   "backwards" fill: hidden during the delay, back to normal styles once finished.
+   Timing (--i, --stagger, --letter-dur) is set inline by Hero.tsx. */
+.hero-letter {
+  display: inline-block;
+  animation: hero-letter var(--letter-dur) ease-out backwards;
+  animation-delay: calc(var(--i) * var(--stagger));
+}
+
+/* The name's gradient. background-clip:text on a parent does NOT work when its children
+   animate (transformed/faded children drop out of the parent's text clip and vanish).
+   So each letter clips its own background, and shows slice --j of --n of one horizontal
+   brand gradient. Adjacent slices meet exactly, so it reads as one gradient across the name. */
+.hero-name-letter {
+  background-image: linear-gradient(90deg, #ff8e53 0%, #ff6b6b 50%, #00d4ff 100%);
+  background-size: calc(var(--n) * 100%) 100%;
+  background-position: calc(var(--j) / (var(--n) - 1) * 100%) 0;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* Everything after the headline fades up in sequence. --d is the delay in ms. */
+.hero-rise {
+  animation: hero-rise 0.5s ease-out backwards;
+  animation-delay: calc(var(--d) * 1ms);
+}
+
+.hero-ring {
+  background: conic-gradient(from 0deg, #ff8e53, #ff6b6b, #00d4ff, #ff8e53);
+  animation: ring-spin 20s linear infinite;
+}
+
+.hero-caret {
+  animation: caret-blink 1s steps(1) infinite;
+}
+
+/* ------------------------------------------------------------------
+   8. Accessibility: respect reduced motion everywhere
    ------------------------------------------------------------------ */
 @media (prefers-reduced-motion: reduce) {
   html {
@@ -182,7 +248,13 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .orb {
+  .orb,
+  .hero-ring {
     animation: none;
+  }
+  /* Show the headline and every hero element immediately, with no delayed reveal. */
+  .hero-letter,
+  .hero-rise {
+    animation: none !important;
   }
 }
