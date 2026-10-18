@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "tailwindcss";
 
 /* ------------------------------------------------------------------
    1. dark: variant follows our data-theme attribute, not the OS
@@ -97,7 +96,80 @@
 }
 
 /* ------------------------------------------------------------------
-   6. Accessibility: respect reduced motion everywhere
+   6. Background gradient orbs (GradientOrbs.tsx)
+   ------------------------------------------------------------------ */
+@keyframes orb-float {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -40px) scale(1.05);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.95);
+  }
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: var(--orb-opacity);
+  animation: orb-float 20s ease-in-out infinite;
+  will-change: transform;
+}
+
+.orb-1 {
+  width: 500px;
+  height: 500px;
+  top: -10%;
+  right: -10%;
+  background: linear-gradient(135deg, #00d4ff, #0099ff);
+  animation-delay: 0s;
+}
+
+.orb-2 {
+  width: 400px;
+  height: 400px;
+  bottom: -10%;
+  left: -10%;
+  background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+  animation-delay: 7s;
+}
+
+/* Centered with margins so the float animation's transform stays free */
+.orb-3 {
+  width: 350px;
+  height: 350px;
+  top: 50%;
+  left: 50%;
+  margin: -175px 0 0 -175px;
+  background: linear-gradient(135deg, #ffd93d, #ff6b6b);
+  animation-delay: 14s;
+}
+
+@media (max-width: 767px) {
+  .orb {
+    filter: blur(60px);
+  }
+  .orb-1 {
+    width: 300px;
+    height: 300px;
+  }
+  .orb-2 {
+    width: 250px;
+    height: 250px;
+  }
+  .orb-3 {
+    width: 220px;
+    height: 220px;
+    margin: -110px 0 0 -110px;
+  }
+}
+
+/* ------------------------------------------------------------------
+   7. Accessibility: respect reduced motion everywhere
    ------------------------------------------------------------------ */
 @media (prefers-reduced-motion: reduce) {
   html {
@@ -109,5 +181,8 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+  .orb {
+    animation: none;
   }
 }
