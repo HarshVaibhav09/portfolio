@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { BackgroundCanvasLoader } from "@/components/background/BackgroundCanvasLoader";
 import { Navbar } from "@/components/layout/Navbar";
 import { site } from "@/lib/content";
 import "./globals.css";
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       {/* suppressHydrationWarning: browser extensions inject attributes onto <body> */}
       <body suppressHydrationWarning>
+        <BackgroundCanvasLoader />
         <Navbar />
         {children}
       </body>

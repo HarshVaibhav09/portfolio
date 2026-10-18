@@ -1,32 +1,18 @@
 "use client";
 
-import { useLayoutEffect, useSyncExternalStore } from "react";
+import { useLayoutEffect } from "react";
 import { Moon, Sun } from "lucide-react";
+import { getTheme, THEME_STORAGE_KEY, useTheme, type Theme } from "@/hooks/useTheme";
 import { ui } from "@/lib/content";
 
-type Theme = "dark" | "light";
-
-const STORAGE_KEY = "theme";
-
-// <html data-theme> is the source of truth. The inline script in layout.tsx sets it
-// before paint; this store lets React read it without a setState-in-effect.
-function subscribe(onChange: () => void) {
-  const observer = new MutationObserver(onChange);
-  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-  return () => observer.disconnect();
-}
-
-const getSnapshot = (): Theme => (document.documentElement.dataset.theme === "light" ? "light" : "dark");
-const getServerSnapshot = (): Theme => "dark";
-
 export function ThemeToggle() {
-  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const theme = useTheme();
 
   // React Strict Mode (dev) remounts and can reset attributes on <html>, wiping what the
   // inline script set. Re-apply the saved theme before paint. No-op in production.
   useLayoutEffect(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = localStorage.getItem(THEME_STORAGE_KEY);
       if (saved === "light" || saved === "dark") {
         document.documentElement.setAttribute("data-theme", saved);
       }
@@ -36,10 +22,10 @@ export function ThemeToggle() {
   }, []);
 
   const toggle = () => {
-    const next: Theme = getSnapshot() === "dark" ? "light" : "dark";
+    const next: Theme = getTheme() === "dark" ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", next);
     try {
-      localStorage.setItem(STORAGE_KEY, next);
+      localStorage.setItem(THEME_STORAGE_KEY, next);
     } catch {
       // Theme still switches for this visit even if it can't be saved.
     }
