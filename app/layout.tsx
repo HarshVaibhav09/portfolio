@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Navbar } from "@/components/layout/Navbar";
 import { site } from "@/lib/content";
 import "./globals.css";
 
@@ -32,7 +33,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body>{children}</body>
+      {/* suppressHydrationWarning: browser extensions inject attributes onto <body> */}
+      <body suppressHydrationWarning>
+        <Navbar />
+        {children}
+      </body>
     </html>
   );
 }

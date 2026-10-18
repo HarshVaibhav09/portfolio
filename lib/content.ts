@@ -184,6 +184,11 @@ export const sections: Record<SectionId, SectionHeader> = {
 
 export const ui = {
   backToTop: "Back to top",
+  logoLabel: "Harsh Vaibhav, back to top",
+  navLabel: "Primary",
+  menu: "Menu",
+  switchToLight: "Switch to light theme",
+  switchToDark: "Switch to dark theme",
 } as const;
 
 /* ------------------------------------------------------------------
