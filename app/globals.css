@@ -1,0 +1,113 @@
+@import "tailwindcss";
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   1. dark: variant follows our data-theme attribute, not the OS
+   ------------------------------------------------------------------ */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ------------------------------------------------------------------
+   2. Raw tokens. Dark is the default theme.
+   ------------------------------------------------------------------ */
+:root {
+  --bg: #0f0f1e;
+  --bg-alt: #1a1a2e;
+  --bg-raised: #252541;
+  --border: rgb(255 255 255 / 0.08);
+  --text: #f5f5f7;
+  --muted: #a8a8b3;
+  --accent: #ff8e53;
+  --accent-2: #00d4ff;
+  --coral: #ff6b6b;
+  --gold: #ffd93d;
+  --orb-opacity: 0.4;
+  --gradient-brand: linear-gradient(135deg, #ff8e53 0%, #ff6b6b 50%, #00d4ff 100%);
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --bg: #ffffff;
+  --bg-alt: #f8f9fa;
+  --bg-raised: #e9ecef;
+  --border: rgb(26 26 46 / 0.1);
+  --text: #1a1a2e;
+  --muted: #4a5568;
+  --accent: #d9480f;
+  --accent-2: #0891b2;
+  --coral: #e03131;
+  --gold: #f59f00;
+  --orb-opacity: 0.25;
+  color-scheme: light;
+}
+
+/* ------------------------------------------------------------------
+   3. Expose tokens to Tailwind (bg-bg, text-muted, border-border ...)
+   ------------------------------------------------------------------ */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-alt: var(--bg-alt);
+  --color-bg-raised: var(--bg-raised);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-coral: var(--coral);
+  --color-gold: var(--gold);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* ------------------------------------------------------------------
+   4. Custom utility: gradient text (hero name, logo)
+   ------------------------------------------------------------------ */
+@utility text-gradient {
+  background-image: var(--gradient-brand);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* ------------------------------------------------------------------
+   5. Base styles
+   ------------------------------------------------------------------ */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem; /* anchor links land below the fixed navbar */
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent-2);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+}
+
+/* ------------------------------------------------------------------
+   6. Accessibility: respect reduced motion everywhere
+   ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
