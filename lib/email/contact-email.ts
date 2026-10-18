@@ -1,4 +1,6 @@
-import { contact } from "@/lib/content";
+// Build-time guard: importing this from a client component fails the build.
+import "server-only";
+import { notificationEmail as copy } from "@/lib/content";
 import { escapeHtml } from "@/lib/utils";
 
 export interface ContactEmailInput {
@@ -15,13 +17,16 @@ export interface ContactEmail {
   text: string;
 }
 
-const copy = contact.notificationEmail;
 const ACCENT = "#FF8E53"; // top border only
-const HEADER_COLOR = "#D9480F"; // light-mode accent: about 4.6:1 on white, passes WCAG AA for small text
+const HEADER_COLOR = "#B43A0A"; // the site's light-mode --accent: 5.9:1 on white, AA for small text
 const FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 
+// C0/C1 control characters plus the Unicode line and paragraph separators. A subject is one
+// header line, so any of these could break it.
+const SUBJECT_UNSAFE = /[\u0000-\u001F\u007F-\u009F\u2028\u2029]+/g;
+
 /** "18 Oct 2026, 9:51 PM IST". Asia/Kolkata has no daylight saving, so the zone is always IST. */
-export function formatReceived(date: Date): string {
+function formatReceived(date: Date): string {
   const parts = Object.fromEntries(
     new Intl.DateTimeFormat("en-US", {
       timeZone: "Asia/Kolkata",
@@ -47,8 +52,10 @@ function row(label: string, valueHtml: string): string {
 }
 
 export function buildContactEmail({ name, email, message, receivedAt }: ContactEmailInput): ContactEmail {
-  // A line break in a subject could break the email header, so flatten them.
-  const subject = copy.subject.replace("{name}", name.replace(/[\r\n]+/g, " "));
+  // Flatten control characters, and pass the name through a replacer function: a string
+  // replacement would expand "$&", "$'" and "$`" typed by the visitor into template text.
+  const flatName = name.replace(SUBJECT_UNSAFE, " ").trim();
+  const subject = copy.subject.replace("{name}", () => flatName);
   const received = formatReceived(receivedAt);
   const body = message.replace(/\r\n?/g, "\n");
 

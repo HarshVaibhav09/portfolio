@@ -27,24 +27,29 @@ const THEME_STYLE: Record<Theme, { blending: THREE.Blending; pointOpacity: numbe
 };
 
 /* ------------------------------------------------------------------
-   Simulation. Plain functions over typed arrays, kept outside React:
-   React only holds the Field object; these mutate it in place.
+   Simulation. Plain functions over typed arrays, kept outside React.
+   The buffers are plain data; the three.js objects that upload them
+   are declared as JSX below, so R3F owns their lifecycle and disposes
+   them on unmount (Strict Mode safe, nothing to free by hand).
    ------------------------------------------------------------------ */
 
-interface Field {
+interface FieldData {
   count: number;
   positions: Float32Array; // xyz per particle
   velocities: Float32Array; // xyz per particle (z unused)
   colors: Float32Array; // rgb per particle
   linePositions: Float32Array; // 2 vertices * xyz per segment
   lineColors: Float32Array; // 2 vertices * rgba per segment
-  lineOpacity: number;
+}
+
+/** The scene objects the simulation writes to, read from refs once mounted. */
+interface FieldScene {
   points: THREE.Points<THREE.BufferGeometry, THREE.PointsMaterial>;
   lines: THREE.LineSegments<THREE.BufferGeometry, THREE.LineBasicMaterial>;
 }
 
-/** Soft round dot so points are not rendered as squares. */
-function createDotTexture() {
+/** Soft round dot so points are not rendered as squares. Uploaded by <canvasTexture>. */
+function createDotCanvas(): HTMLCanvasElement {
   const size = 64;
   const canvas = document.createElement("canvas");
   canvas.width = canvas.height = size;
@@ -57,19 +62,14 @@ function createDotTexture() {
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, size, size);
   }
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  return texture;
+  return canvas;
 }
 
 /** Allocates every buffer once. Nothing is allocated per frame. */
-function createField(count: number, width: number, height: number): Field {
+function createFieldData(count: number, width: number, height: number): FieldData {
   const maxSegments = (count * (count - 1)) / 2;
   const positions = new Float32Array(count * 3);
   const velocities = new Float32Array(count * 3);
-  const colors = new Float32Array(count * 3);
-  const linePositions = new Float32Array(maxSegments * 2 * 3);
-  const lineColors = new Float32Array(maxSegments * 2 * 4); // RGBA: alpha fades lines in both blend modes
 
   for (let i = 0; i < count; i++) {
     const angle = Math.random() * Math.PI * 2;
@@ -80,56 +80,18 @@ function createField(count: number, width: number, height: number): Field {
     velocities[i * 3 + 1] = Math.sin(angle) * speed;
   }
 
-  const pointGeometry = new THREE.BufferGeometry();
-  pointGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3).setUsage(THREE.DynamicDrawUsage));
-  pointGeometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-
-  const lineGeometry = new THREE.BufferGeometry();
-  lineGeometry.setAttribute("position", new THREE.BufferAttribute(linePositions, 3).setUsage(THREE.DynamicDrawUsage));
-  lineGeometry.setAttribute("color", new THREE.BufferAttribute(lineColors, 4).setUsage(THREE.DynamicDrawUsage));
-  lineGeometry.setDrawRange(0, 0);
-
-  const points = new THREE.Points(
-    pointGeometry,
-    new THREE.PointsMaterial({
-      size: POINT_SIZE,
-      map: createDotTexture(),
-      vertexColors: true,
-      transparent: true,
-      depthWrite: false,
-    }),
-  );
-  const lines = new THREE.LineSegments(
-    lineGeometry,
-    new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, depthWrite: false }),
-  );
-  // Positions change every frame, so a bounding sphere computed once would cull wrongly.
-  points.frustumCulled = false;
-  lines.frustumCulled = false;
-
   return {
     count,
     positions,
     velocities,
-    colors,
-    linePositions,
-    lineColors,
-    lineOpacity: THEME_STYLE.dark.lineOpacity,
-    points,
-    lines,
+    colors: new Float32Array(count * 3),
+    linePositions: new Float32Array(maxSegments * 2 * 3),
+    lineColors: new Float32Array(maxSegments * 2 * 4), // RGBA: alpha fades lines in both blend modes
   };
 }
 
-function disposeField({ points, lines }: Field) {
-  points.geometry.dispose();
-  points.material.map?.dispose();
-  points.material.dispose();
-  lines.geometry.dispose();
-  lines.material.dispose();
-}
-
 /** Blending, opacity and particle colors for a theme. Runs only on theme change. */
-function applyTheme(field: Field, theme: Theme) {
+function applyTheme(data: FieldData, { points, lines }: FieldScene, theme: Theme): void {
   const style = THEME_STYLE[theme];
   const css = getComputedStyle(document.documentElement);
   const palette = [
@@ -137,8 +99,8 @@ function applyTheme(field: Field, theme: Theme) {
     new THREE.Color(css.getPropertyValue("--accent-2").trim() || "#00D4FF"),
   ];
 
-  const { colors, points, lines } = field;
-  for (let i = 0; i < field.count; i++) {
+  const { colors } = data;
+  for (let i = 0; i < data.count; i++) {
     const c = palette[i % 2]; // alternate warm orange and cyan
     colors[i * 3] = c.r;
     colors[i * 3 + 1] = c.g;
@@ -149,20 +111,20 @@ function applyTheme(field: Field, theme: Theme) {
   points.material.blending = lines.material.blending = style.blending;
   points.material.opacity = style.pointOpacity;
   points.material.needsUpdate = lines.material.needsUpdate = true;
-  field.lineOpacity = style.lineOpacity;
 }
 
 /** Drift, cursor repulsion and bouncing at the visible viewport edges. */
 function stepParticles(
-  field: Field,
+  data: FieldData,
+  points: FieldScene["points"],
   dt: number,
   halfW: number,
   halfH: number,
   repel: boolean,
   cursorX: number,
   cursorY: number,
-) {
-  const { count, positions: p, velocities: v } = field;
+): void {
+  const { count, positions: p, velocities: v } = data;
   const repelR2 = REPEL_RADIUS * REPEL_RADIUS;
 
   for (let i = 0; i < count; i++) {
@@ -214,12 +176,18 @@ function stepParticles(
     v[ix] = vx;
     v[iy] = vy;
   }
-  field.points.geometry.attributes.position.needsUpdate = true;
+  points.geometry.attributes.position.needsUpdate = true;
 }
 
 /** Rebuilds line segments: n(n-1)/2 pair checks, sqrt only for pairs that draw a line. */
-function updateLinks(field: Field, halfW: number, halfH: number) {
-  const { count, positions: p, colors: c, linePositions: lp, lineColors: lc } = field;
+function updateLinks(
+  data: FieldData,
+  lines: FieldScene["lines"],
+  maxAlpha: number,
+  halfW: number,
+  halfH: number,
+): void {
+  const { count, positions: p, colors: c, linePositions: lp, lineColors: lc } = data;
 
   // Size the link distance to the viewport so density looks the same on phone and desktop.
   const linkDist = Math.min(
@@ -227,7 +195,6 @@ function updateLinks(field: Field, halfW: number, halfH: number) {
     Math.max(LINK_DIST_MIN, Math.sqrt((TARGET_NEIGHBORS * 4 * halfW * halfH) / (Math.PI * count))),
   );
   const linkDist2 = linkDist * linkDist;
-  const maxAlpha = field.lineOpacity;
 
   let segments = 0;
   for (let i = 0; i < count; i++) {
@@ -261,7 +228,7 @@ function updateLinks(field: Field, halfW: number, halfH: number) {
     }
   }
 
-  const geometry = field.lines.geometry;
+  const geometry = lines.geometry;
   geometry.setDrawRange(0, segments * 2);
   // Upload only the part of each buffer that is in use this frame.
   const posAttr = geometry.attributes.position as THREE.BufferAttribute;
@@ -288,20 +255,23 @@ export function NeuralField({ count, animate }: NeuralFieldProps) {
   const invalidate = useThree((s) => s.invalidate);
   const theme = useTheme();
   const pointerActive = useRef(false);
+  const pointsRef = useRef<FieldScene["points"]>(null);
+  const linesRef = useRef<FieldScene["lines"]>(null);
 
-  // Re-created only when the particle count changes (desktop <-> mobile breakpoint).
-  const field = useMemo(() => {
+  // Plain typed arrays, re-created only when the particle count changes (phone <-> desktop).
+  const data = useMemo(() => {
     const { width, height } = get().viewport;
-    return createField(count, width, height);
+    return createFieldData(count, width, height);
   }, [count, get]);
-
-  // Free GPU memory when the field is replaced or the canvas unmounts.
-  useEffect(() => () => disposeField(field), [field]);
+  const dotCanvas = useMemo(() => createDotCanvas(), []);
 
   useEffect(() => {
-    applyTheme(field, theme);
+    const points = pointsRef.current;
+    const lines = linesRef.current;
+    if (!points || !lines) return;
+    applyTheme(data, { points, lines }, theme);
     invalidate(); // in demand mode (reduced motion) nothing redraws on its own
-  }, [field, theme, invalidate]);
+  }, [data, theme, invalidate]);
 
   // Only repel while a real cursor or touch is on the page; R3F's pointer starts at (0,0).
   useEffect(() => {
@@ -328,6 +298,10 @@ export function NeuralField({ count, animate }: NeuralFieldProps) {
 
   // Runs every rendered frame, outside React: no state, no re-renders.
   useFrame((state, delta) => {
+    const points = pointsRef.current;
+    const lines = linesRef.current;
+    if (!points || !lines) return;
+
     // Read the viewport every frame so a resize needs no re-render.
     const halfW = state.viewport.width / 2;
     const halfH = state.viewport.height / 2;
@@ -337,15 +311,36 @@ export function NeuralField({ count, animate }: NeuralFieldProps) {
       // pointer is normalized [-1, 1]; scale to world units at z=0.
       const cursorX = state.pointer.x * halfW;
       const cursorY = state.pointer.y * halfH;
-      stepParticles(field, dt, halfW, halfH, pointerActive.current, cursorX, cursorY);
+      stepParticles(data, points, dt, halfW, halfH, pointerActive.current, cursorX, cursorY);
     }
-    updateLinks(field, halfW, halfH);
+    updateLinks(data, lines, THEME_STYLE[theme].lineOpacity, halfW, halfH);
   });
 
+  // Keyed by count: a new particle count remounts the group, and R3F disposes the old
+  // geometries, materials and texture. frustumCulled is off because positions change every
+  // frame, so a bounding sphere computed once would cull wrongly.
   return (
-    <>
-      <primitive object={field.lines} />
-      <primitive object={field.points} />
-    </>
+    <group key={count}>
+      <lineSegments ref={linesRef} frustumCulled={false}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            args={[data.linePositions, 3]}
+            usage={THREE.DynamicDrawUsage}
+          />
+          <bufferAttribute attach="attributes-color" args={[data.lineColors, 4]} usage={THREE.DynamicDrawUsage} />
+        </bufferGeometry>
+        <lineBasicMaterial vertexColors transparent depthWrite={false} />
+      </lineSegments>
+      <points ref={pointsRef} frustumCulled={false}>
+        <bufferGeometry>
+          <bufferAttribute attach="attributes-position" args={[data.positions, 3]} usage={THREE.DynamicDrawUsage} />
+          <bufferAttribute attach="attributes-color" args={[data.colors, 3]} />
+        </bufferGeometry>
+        <pointsMaterial size={POINT_SIZE} vertexColors transparent depthWrite={false}>
+          <canvasTexture attach="map" args={[dotCanvas]} colorSpace={THREE.SRGBColorSpace} />
+        </pointsMaterial>
+      </points>
+    </group>
   );
 }

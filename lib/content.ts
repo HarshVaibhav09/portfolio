@@ -1,20 +1,13 @@
 // Single source of truth for all copy on the site.
-// Every date, metric and link is copied from PORTFOLIO_FACTS.md. Do not round or invent.
+// Every date, metric and link is copied from PORTFOLIO_FACTS.md (a local, untracked notes file).
+// Do not round or invent.
 
 /* ------------------------------------------------------------------
    Types
    ------------------------------------------------------------------ */
 
-/** Keys mapped to lucide-react icons by UI components. */
-export type UiIconKey =
-  | "home"
-  | "user"
-  | "briefcase"
-  | "code"
-  | "clock"
-  | "mail"
-  | "map-pin"
-  | "arrow-up";
+/** Keys mapped to lucide-react icons by the Navbar. */
+export type UiIconKey = "home" | "user" | "briefcase" | "code" | "clock" | "mail";
 
 /** Keys mapped to brand logos (react-icons/si) or lucide fallbacks by social link components. */
 export type SocialIconKey = "github" | "linkedin" | "email";
@@ -83,9 +76,11 @@ export interface Profile {
   name: string;
   role: string;
   location: string;
+  /** ISO 3166-1 alpha-2, for structured data. */
+  countryCode: string;
   email: string;
+  school: string;
   education: string;
-  cgpa: string;
   status: string;
   greeting: string;
   rotatingPrefix: string;
@@ -191,12 +186,8 @@ export const nav: NavItem[] = [
   { id: "contact", label: "Contact", icon: "mail" },
 ];
 
-export const sections: Record<SectionId, SectionHeader> = {
-  home: {
-    label: "Home",
-    title: "Hi, I'm Harsh Vaibhav",
-    description: "Full Stack + AI Engineer based in Bengaluru.",
-  },
+/** Headers for the Section component. The hero (#home) has its own layout, so it has none. */
+export const sections: Record<Exclude<SectionId, "home">, SectionHeader> = {
   about: {
     label: "About",
     title: "About me",
@@ -233,19 +224,24 @@ export const ui = {
   menu: "Menu",
   switchToLight: "Switch to light theme",
   switchToDark: "Switch to dark theme",
+  /** Visually hidden, appended to links that open in a new tab. */
+  newTab: "(opens in a new tab)",
 } as const;
 
 /* ------------------------------------------------------------------
    Profile
    ------------------------------------------------------------------ */
 
+const SCHOOL = "NIT Jalandhar";
+
 export const profile: Profile = {
   name: "Harsh Vaibhav",
   role: "Full Stack + AI Engineer",
   location: "Bengaluru, India",
+  countryCode: "IN",
   email: "vaibhavharsh08@gmail.com",
-  education: "B.Tech, NIT Jalandhar, 2026",
-  cgpa: "7.58/10",
+  school: SCHOOL,
+  education: `B.Tech, ${SCHOOL}, 2026`,
   status: "Open to Full Stack + AI Engineer roles",
   greeting: "Hi, I'm",
   rotatingPrefix: "I build ",
@@ -296,7 +292,8 @@ export const contact = {
     email: { label: "Email", placeholder: "you@company.com" },
     message: { label: "Message", placeholder: "What would you like to talk about?" },
   },
-  honeypotLabel: "Leave this field empty",
+  /** Honeypot label. No words that autofill heuristics match (name, email, url, company...). */
+  honeypotLabel: "Leave blank",
   submit: "Send message",
   sending: "Sending...",
   success: "Thanks, your message is on its way. I will reply to the email you entered.",
@@ -311,22 +308,37 @@ export const contact = {
     nameShort: "Please enter at least 2 characters.",
     nameLong: "Please keep your name under 80 characters.",
     email: "Please enter a valid email address.",
+    emailLong: "Please use an email address under 254 characters.",
     messageShort: "Please write at least 10 characters.",
     messageLong: "Please keep your message under 2,000 characters.",
   },
-  /** The notification email I receive for each message (lib/email/contact-email.ts). */
-  notificationEmail: {
-    from: "Harsh's Portfolio <onboarding@resend.dev>",
-    /** {name} is replaced with the visitor's name. */
-    subject: "New message from {name} via your portfolio",
-    heading: "New portfolio message",
-    labels: { name: "Name", email: "Email", message: "Message", received: "Received" },
-  },
+  /** Shown only when JavaScript is off: the form needs it, the links beside it do not. */
+  noscript: "The form needs JavaScript. You can email me directly instead.",
+} as const;
+
+/**
+ * The notification email I receive for each message (lib/email/contact-email.ts).
+ * A separate export, not part of `contact`, so this server-only copy stays out of the
+ * client bundle (ContactForm imports `contact`).
+ */
+export const notificationEmail = {
+  from: "Harsh's Portfolio <onboarding@resend.dev>",
+  /** {name} is replaced with the visitor's name. */
+  subject: "New message from {name} via your portfolio",
+  heading: "New portfolio message",
+  labels: { name: "Name", email: "Email", message: "Message", received: "Received" },
+} as const;
+
+/** Joining words for the experience timeline. {start} and {end} are replaced. */
+export const timeline = {
+  dateRange: "{start} to {end}",
+  modeSeparator: "·",
 } as const;
 
 export const footer = {
   tagline: "Full Stack + AI Engineer in Bengaluru, building LLM systems and the products around them.",
   builtWith: "Built with Next.js, React Three Fiber and Tailwind",
+  copyright: "©",
 } as const;
 
 const AWS_CERT = "AWS Certified Cloud Practitioner";

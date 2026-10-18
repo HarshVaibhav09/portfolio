@@ -34,7 +34,7 @@ export function Footer() {
         <div className="font-mono text-xs text-muted md:text-right">
           <p>{footer.builtWith}</p>
           <p className="mt-1">
-            © <CopyrightYear /> {profile.name}
+            {footer.copyright} <CopyrightYear /> {profile.name}
           </p>
         </div>
       </div>

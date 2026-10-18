@@ -6,6 +6,7 @@ import { sendContact } from "@/app/actions/contact";
 import { Button } from "@/components/ui/Button";
 import { contact } from "@/lib/content";
 import {
+  HONEYPOT_FIELD,
   initialContactResult,
   MESSAGE_MAX,
   NAME_MAX,
@@ -30,7 +31,7 @@ const loadSchema = () => import("@/lib/schemas/contact");
 async function validateThenSend(prev: ContactResult, formData: FormData): Promise<ContactResult> {
   const input = readContactForm(formData);
   // A filled honeypot goes straight to the server, which quietly drops it.
-  if (!input.website) {
+  if (!input.honeypot) {
     const { contactSchema, invalidResult } = await loadSchema();
     const parsed = contactSchema.safeParse(input);
     if (!parsed.success) return invalidResult(parsed.error, input);
@@ -110,15 +111,8 @@ export function ContactForm() {
       </div>
       <Field name="message" multiline maxLength={MESSAGE_MAX} error={errorFor("message")} defaultValue={state.values?.message} />
 
-      {/* Honeypot: off-screen (not display:none, which some bots skip), out of the tab order,
-          hidden from screen readers. Only bots fill it. */}
-      <div aria-hidden="true" className="absolute -left-[9999px] top-0 h-px w-px overflow-hidden">
-        <label htmlFor="contact-website">{contact.honeypotLabel}</label>
-        <input id="contact-website" name="website" type="text" tabIndex={-1} autoComplete="off" />
-      </div>
-
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <Button type="submit" variant="outline" disabled={pending} aria-disabled={pending} className="w-full shrink-0 sm:w-auto">
+        <Button type="submit" variant="outline" disabled={pending} className="w-full shrink-0 sm:w-auto">
           {pending ? (
             <Loader2 className="size-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
           ) : (
@@ -126,10 +120,35 @@ export function ContactForm() {
           )}
           {pending ? contact.sending : contact.submit}
         </Button>
-        {/* Announced to screen readers when it changes */}
-        <p role="status" aria-live="polite" className={cn("text-sm", state.ok ? "text-success" : "text-danger")}>
+        {/* role="status" is a polite live region: announced to screen readers when it changes */}
+        <p role="status" className={cn("text-sm", state.ok ? "text-success" : "text-danger")}>
           {state.message}
         </p>
+      </div>
+
+      {/* Honeypot. Only bots fill it; a real visitor must never be able to, because the server
+          silently drops any message where it has a value. So it is:
+          - off-screen, not display:none (some bots skip fields they can tell are hidden);
+          - inert + tabIndex -1 + aria-hidden: unfocusable and out of the accessibility tree.
+            Chrome does not autofill fields that cannot be focused, and an inert input is still
+            submitted with the form (unlike a disabled one);
+          - named and labeled with nothing autofill heuristics recognize, placed after the
+            submit row rather than beside the real name and email inputs;
+          - autoComplete off, plus the opt-out attributes 1Password, LastPass, Bitwarden and
+            Dashlane read. */}
+      <div aria-hidden="true" inert className="absolute -left-[9999px] top-0 h-px w-px overflow-hidden">
+        <label htmlFor={`cf-${HONEYPOT_FIELD}`}>{contact.honeypotLabel}</label>
+        <input
+          id={`cf-${HONEYPOT_FIELD}`}
+          name={HONEYPOT_FIELD}
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          data-1p-ignore
+          data-lpignore="true"
+          data-bwignore
+          data-form-type="other"
+        />
       </div>
     </form>
   );

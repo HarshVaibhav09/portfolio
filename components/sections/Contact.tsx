@@ -2,7 +2,7 @@ import { cardBase } from "@/components/ui/card-styles";
 import { Reveal } from "@/components/ui/Reveal";
 import { Section } from "@/components/ui/Section";
 import { SocialIcon } from "@/components/ui/SocialIcon";
-import { contact, profile, sections } from "@/lib/content";
+import { contact, profile, sections, ui } from "@/lib/content";
 import { cn, isExternal } from "@/lib/utils";
 import { ContactForm } from "./ContactForm";
 
@@ -36,6 +36,7 @@ export function Contact() {
                         {link.href.replace(/^(mailto:|https?:\/\/)/, "")}
                       </span>
                     </span>
+                    {external && <span className="sr-only"> {ui.newTab}</span>}
                   </a>
                 </li>
               );
@@ -46,6 +47,10 @@ export function Contact() {
         <Reveal delay={0.1}>
           {/* Card styling without the hover lift: a form should not move while you type in it */}
           <div className={cn(cardBase, "p-6 md:p-8")}>
+            {/* The form validates in the browser first, so it needs JavaScript; the links do not. */}
+            <noscript>
+              <p className="mb-5 text-sm text-muted">{contact.noscript}</p>
+            </noscript>
             <ContactForm />
           </div>
         </Reveal>

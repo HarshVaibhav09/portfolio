@@ -12,7 +12,7 @@ const BRAND = "linear-gradient(90deg, #FF8E53 0%, #FF6B6B 50%, #00D4FF 100%)";
 export const ogSize = { width: 1200, height: 630 };
 export const ogAlt = `${profile.name}, ${profile.role}`;
 
-export function renderOgImage() {
+export function renderOgImage(): ImageResponse {
   return new ImageResponse(
     (
       <div
@@ -56,7 +56,7 @@ export function renderOgImage() {
 }
 
 /** "HV" monogram: navy rounded square with the letters in the brand gradient. */
-export function renderIcon(size: number) {
+export function renderIcon(size: number): ImageResponse {
   return new ImageResponse(
     (
       <div

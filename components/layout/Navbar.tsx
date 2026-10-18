@@ -1,19 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  ArrowUp,
-  Briefcase,
-  Clock,
-  Code,
-  House,
-  Mail,
-  MapPin,
-  Menu,
-  User,
-  X,
-  type LucideIcon,
-} from "lucide-react";
+import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
+import { Briefcase, Clock, Code, House, Mail, Menu, User, X, type LucideIcon } from "lucide-react";
 import { nav, site, ui, type NavItem, type SectionId, type UiIconKey } from "@/lib/content";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./ThemeToggle";
@@ -25,8 +13,6 @@ const icons: Record<UiIconKey, LucideIcon> = {
   code: Code,
   clock: Clock,
   mail: Mail,
-  "map-pin": MapPin,
-  "arrow-up": ArrowUp,
 };
 
 const MENU_ID = "mobile-menu";
@@ -164,7 +150,7 @@ export function Navbar() {
     };
   }, [open, close]);
 
-  const scrollToTop = (e: React.MouseEvent) => {
+  const scrollToTop = (e: MouseEvent) => {
     e.preventDefault();
     close(false);
     // Default behavior follows CSS scroll-behavior, which reduced motion sets to auto.
@@ -226,7 +212,9 @@ export function Navbar() {
           <ul className="flex flex-col px-4 py-3">
             {nav.map((item) => (
               <li key={item.id}>
-                <NavLink item={item} active={active === item.id} stacked onClick={() => close(true)} />
+                {/* close(false): the fragment navigation sets the focus starting point, so the
+                    next Tab continues from the chosen section, not from the menu button. */}
+                <NavLink item={item} active={active === item.id} stacked onClick={() => close(false)} />
               </li>
             ))}
           </ul>

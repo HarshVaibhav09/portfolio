@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# private working notes (kept locally, not published)
+/PORTFOLIO_FACTS.md
+/BUILD_PROMPTS.md

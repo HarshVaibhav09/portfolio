@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { ui } from "@/lib/content";
 import { cn, isExternal } from "@/lib/utils";
 
 type Variant = "gradient" | "outline" | "ghost";
@@ -10,7 +11,7 @@ const base =
 
 const variants: Record<Variant, string> = {
   gradient:
-    // Dark navy text: white on #FF8E53 → #00D4FF is only ~1.6–2.6:1. Navy is 7:1+ on every stop.
+    // Dark navy text: white on #FF8E53 → #00D4FF is only ~1.6 to 2.6:1. Navy is 7:1+ on every stop.
     "text-[#0F0F1E] shadow-lg shadow-accent/20 hover:shadow-accent/40 [background-image:var(--gradient-brand)]",
   outline: "border border-accent/60 text-accent hover:border-accent hover:bg-accent/10",
   ghost: "text-text hover:bg-bg-raised hover:text-accent",
@@ -48,15 +49,25 @@ export function Button(props: ButtonProps) {
     const { href, download, children, "aria-label": ariaLabel } = props;
 
     if (isExternal(href)) {
+      // Tell screen reader users about the new tab. An aria-label replaces the content,
+      // so the hint goes into the label when there is one.
       return (
-        <a href={href} target="_blank" rel="noopener noreferrer" aria-label={ariaLabel} className={classes}>
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={ariaLabel ? `${ariaLabel} ${ui.newTab}` : undefined}
+          className={classes}
+        >
           {children}
+          {!ariaLabel && <span className="sr-only"> {ui.newTab}</span>}
         </a>
       );
     }
 
-    // mailto:, tel: and static files (resume.pdf) are not app routes, so skip next/link.
-    if (/^(mailto:|tel:)/.test(href) || download || /\.\w+$/.test(href)) {
+    // Same-page anchors (#work), mailto:, tel: and static files (resume.pdf) are not app routes,
+    // so skip next/link. A plain anchor also lets the browser move the focus starting point.
+    if (href.startsWith("#") || /^(mailto:|tel:)/.test(href) || download || /\.\w+$/.test(href)) {
       return (
         <a href={href} download={download} aria-label={ariaLabel} className={classes}>
           {children}

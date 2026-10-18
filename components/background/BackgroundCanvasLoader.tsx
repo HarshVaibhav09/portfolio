@@ -7,8 +7,9 @@ import dynamic from "next/dynamic";
 // server render and the initial JS bundle.
 const BackgroundCanvas = dynamic(() => import("./BackgroundCanvas"), { ssr: false });
 
-// Phones: slow CPUs, and nothing to react to until a touch anyway.
-const PHONE_QUERY = "(max-width: 768px), (pointer: coarse)";
+// Phones: slow CPUs, and nothing to react to until a touch anyway. 767px matches Tailwind's
+// md breakpoint (768px and up is the desktop layout).
+const PHONE_QUERY = "(max-width: 767px), (pointer: coarse)";
 const FIRST_INTERACTION = ["scroll", "touchstart", "pointerdown", "keydown"] as const;
 
 /**
@@ -27,12 +28,16 @@ export function BackgroundCanvasLoader() {
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
     if (window.matchMedia(PHONE_QUERY).matches) {
-      const onFirst = () => setReady(true);
-      const opts = { once: true, passive: true } as const;
-      for (const type of FIRST_INTERACTION) window.addEventListener(type, onFirst, opts);
-      return () => {
+      // Whichever event comes first wins; the other three listeners are removed with it.
+      const onFirst = () => {
+        removeAll();
+        setReady(true);
+      };
+      const removeAll = () => {
         for (const type of FIRST_INTERACTION) window.removeEventListener(type, onFirst);
       };
+      for (const type of FIRST_INTERACTION) window.addEventListener(type, onFirst, { passive: true });
+      return removeAll;
     }
 
     const schedule = () => {

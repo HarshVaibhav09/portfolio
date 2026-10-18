@@ -23,7 +23,8 @@ export function RotatingText({ prefix, words, startAtMs }: RotatingTextProps) {
   useEffect(() => {
     if (reducedMotion) return;
 
-    let timer: ReturnType<typeof setTimeout>;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let clear: ReturnType<typeof setTimeout> | undefined;
     let wordIndex = 0;
     let length = 0;
     let deleting = false;
@@ -52,10 +53,20 @@ export function RotatingText({ prefix, words, startAtMs }: RotatingTextProps) {
       }
     };
 
-    // The line is still invisible (CSS fade-up has not started), so clearing it is not seen.
-    const clear = setTimeout(() => setText(""), 0);
     // performance.now() is time since navigation start, roughly when the CSS reveal began.
-    timer = setTimeout(tick, Math.max(0, startAtMs - performance.now()));
+    const untilStart = startAtMs - performance.now();
+    if (untilStart > 0) {
+      // Hydrated early: the line is still invisible (its fade-up has not started), so clear
+      // the server-rendered word unseen and type it in once the reveal begins.
+      clear = setTimeout(() => setText(""), 0);
+      timer = setTimeout(tick, untilStart);
+    } else {
+      // Hydrated late (slow network): the first word is already on screen. Keep it, hold,
+      // then delete it, rather than making it vanish and retype.
+      length = words[0].length;
+      deleting = true;
+      timer = setTimeout(tick, HOLD_MS);
+    }
 
     return () => {
       clearTimeout(clear);

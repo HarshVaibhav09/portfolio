@@ -1,6 +1,6 @@
 import { Reveal } from "@/components/ui/Reveal";
 import { Section } from "@/components/ui/Section";
-import { experience, sections } from "@/lib/content";
+import { experience, sections, timeline } from "@/lib/content";
 import { Achievements } from "./Achievements";
 
 export function Experience() {
@@ -17,10 +17,13 @@ export function Experience() {
               />
               <h3 className="text-xl font-semibold tracking-tight">{job.role}</h3>
               <p className="mt-1 text-text/85">
-                {job.company} <span className="text-muted">· {job.mode}</span>
+                {job.company}{" "}
+                <span className="text-muted">
+                  {timeline.modeSeparator} {job.mode}
+                </span>
               </p>
               <p className="mt-1 font-mono text-xs text-muted">
-                {job.start} to {job.end}
+                {timeline.dateRange.replace("{start}", job.start).replace("{end}", job.end)}
               </p>
               <ul className="mt-4 space-y-2 text-muted">
                 {job.highlights.map((item) => (

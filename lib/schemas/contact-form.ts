@@ -4,9 +4,21 @@
 import type { ContactInput } from "./contact";
 
 export const NAME_MAX = 80;
+/** RFC 5321 limit for a full address. */
+export const EMAIL_MAX = 254;
 export const MESSAGE_MAX = 2000;
 
 export type ContactField = "name" | "email" | "message";
+
+/**
+ * Form field name of the honeypot. Deliberately meaningless: browsers and password managers
+ * classify fields by name, id and label, and a recognizable name ("website" was one) gets
+ * autofilled, which silently dropped real messages.
+ */
+export const HONEYPOT_FIELD = "zq7k";
+
+/** Raw form values as strings, before validation. `honeypot` must stay empty. */
+export type ContactFormInput = Record<ContactField | "honeypot", string>;
 
 export interface ContactResult {
   ok: boolean;
@@ -19,10 +31,10 @@ export interface ContactResult {
 export const initialContactResult: ContactResult = { ok: false, message: "" };
 
 /** Reads the raw string fields both sides validate. */
-export function readContactForm(formData: FormData) {
-  const get = (key: string) => {
+export function readContactForm(formData: FormData): ContactFormInput {
+  const get = (key: string): string => {
     const value = formData.get(key);
     return typeof value === "string" ? value : "";
   };
-  return { name: get("name"), email: get("email"), message: get("message"), website: get("website") };
+  return { name: get("name"), email: get("email"), message: get("message"), honeypot: get(HONEYPOT_FIELD) };
 }

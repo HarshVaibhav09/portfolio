@@ -10,7 +10,8 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
  * Layering: orbs (-z-10) < this canvas (-z-[5]) < page content < Navbar (z-50).
  */
 export default function BackgroundCanvas() {
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  // Same breakpoint as Tailwind's md (and BackgroundCanvasLoader): below 768px is a phone.
+  const isMobile = useMediaQuery("(max-width: 767px)");
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
   const [hidden, setHidden] = useState(false);
 

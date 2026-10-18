@@ -4,9 +4,15 @@ import { headers } from "next/headers";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { Resend } from "resend";
-import { contact } from "@/lib/content";
+import { contact, notificationEmail } from "@/lib/content";
 import { buildContactEmail } from "@/lib/email/contact-email";
-import { contactSchema, invalidResult, readContactForm, type ContactResult } from "@/lib/schemas/contact";
+import {
+  contactSchema,
+  invalidResult,
+  readContactForm,
+  type ContactFormInput,
+  type ContactResult,
+} from "@/lib/schemas/contact";
 
 const REQUIRED_ENV = [
   "RESEND_API_KEY",
@@ -15,17 +21,19 @@ const REQUIRED_ENV = [
   "UPSTASH_REDIS_REST_TOKEN",
 ] as const;
 
+type ContactEnv = Record<(typeof REQUIRED_ENV)[number], string>;
+
 const success: ContactResult = { ok: true, message: contact.success };
 
 /** Failure that keeps what the visitor typed (React resets the form after every submit). */
-function fail(message: string, input: ReturnType<typeof readContactForm>): ContactResult {
+function fail(message: string, input: ContactFormInput): ContactResult {
   return { ok: false, message, values: { name: input.name, email: input.email, message: input.message } };
 }
 
 // One limiter per server instance. Created lazily, after the env check has passed.
 let ratelimit: Ratelimit | undefined;
 
-function getRatelimit(url: string, token: string) {
+function getRatelimit(url: string, token: string): Ratelimit {
   ratelimit ??= new Ratelimit({
     redis: new Redis({ url, token }),
     limiter: Ratelimit.slidingWindow(3, "10 m"),
@@ -38,11 +46,14 @@ function getRatelimit(url: string, token: string) {
 }
 
 /** All required env vars, or null (after logging which ones are missing). */
-function readEnv() {
-  const env = Object.fromEntries(REQUIRED_ENV.map((key) => [key, process.env[key]?.trim() ?? ""])) as Record<
-    (typeof REQUIRED_ENV)[number],
-    string
-  >;
+function readEnv(): ContactEnv | null {
+  const read = (key: keyof ContactEnv): string => process.env[key]?.trim() ?? "";
+  const env: ContactEnv = {
+    RESEND_API_KEY: read("RESEND_API_KEY"),
+    CONTACT_TO_EMAIL: read("CONTACT_TO_EMAIL"),
+    UPSTASH_REDIS_REST_URL: read("UPSTASH_REDIS_REST_URL"),
+    UPSTASH_REDIS_REST_TOKEN: read("UPSTASH_REDIS_REST_TOKEN"),
+  };
   const missing = REQUIRED_ENV.filter((key) => !env[key]);
   if (missing.length > 0) {
     console.error(`[contact] missing environment variables: ${missing.join(", ")}`);
@@ -51,8 +62,12 @@ function readEnv() {
   return env;
 }
 
-/** Rate-limit key: the client IP. On Vercel, x-forwarded-for is set by the platform. */
-async function clientKey() {
+/**
+ * Rate-limit key: the client IP. Trust assumption: on Vercel, x-forwarded-for and x-real-ip are
+ * set by the platform (client-sent values are overwritten), so they cannot be spoofed. On a host
+ * without that guarantee, the leftmost x-forwarded-for entry would be client-controlled.
+ */
+async function clientKey(): Promise<string> {
   const h = await headers();
   const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip")?.trim();
   // No IP at all (unusual): everyone in that state shares one bucket instead of being unlimited.
@@ -63,7 +78,7 @@ export async function sendContact(_prev: ContactResult, formData: FormData): Pro
   const input = readContactForm(formData);
 
   // 1. Honeypot filled: pretend it worked so the bot learns nothing, but send nothing.
-  if (input.website) {
+  if (input.honeypot) {
     console.warn("[contact] honeypot filled, submission dropped");
     return success;
   }
@@ -97,7 +112,7 @@ export async function sendContact(_prev: ContactResult, formData: FormData): Pro
   const mail = buildContactEmail({ name, email, message, receivedAt: new Date() });
   try {
     const { error } = await new Resend(env.RESEND_API_KEY).emails.send({
-      from: contact.notificationEmail.from,
+      from: notificationEmail.from,
       to: env.CONTACT_TO_EMAIL,
       replyTo: email,
       subject: mail.subject,

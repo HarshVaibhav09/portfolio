@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { BackgroundCanvasLoader } from "@/components/background/BackgroundCanvasLoader";
 import { BackToTop } from "@/components/layout/BackToTop";
@@ -41,6 +41,11 @@ export const metadata: Metadata = {
     title: site.title,
     description: site.description,
   },
+};
+
+// Mobile browser chrome matches the default (dark) page background, --bg in globals.css.
+export const viewport: Viewport = {
+  themeColor: "#0F0F1E",
 };
 
 // Runs during HTML parsing, before first paint, so a saved light theme never flashes dark.

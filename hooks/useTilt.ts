@@ -1,5 +1,5 @@
 import type { PointerEvent } from "react";
-import { useMotionTemplate, useMotionValue, useSpring, useTransform } from "motion/react";
+import { useMotionTemplate, useMotionValue, useSpring, useTransform, type MotionStyle } from "motion/react";
 import { useMediaQuery } from "./useMediaQuery";
 
 const SPRING = { stiffness: 220, damping: 22, mass: 0.6 };
@@ -12,6 +12,15 @@ interface TiltOptions {
   enabled?: boolean;
 }
 
+export interface Tilt<T extends HTMLElement> {
+  /** False on touch devices, under reduced motion, or when disabled. */
+  active: boolean;
+  /** Card style (motion values); undefined when inactive so the card stays flat. */
+  style: MotionStyle | undefined;
+  glareStyle: MotionStyle;
+  handlers: { onPointerMove?: (e: PointerEvent<T>) => void; onPointerLeave?: () => void };
+}
+
 /**
  * Pointer-based 3D tilt with a soft moving glare.
  *
@@ -19,7 +28,11 @@ interface TiltOptions {
  * element's style directly, so moving the mouse causes no React re-render.
  * Off for touch devices (pointer: coarse) and under prefers-reduced-motion.
  */
-export function useTilt<T extends HTMLElement>({ max = 8, perspective = 1000, enabled = true }: TiltOptions = {}) {
+export function useTilt<T extends HTMLElement>({
+  max = 8,
+  perspective = 1000,
+  enabled = true,
+}: TiltOptions = {}): Tilt<T> {
   const coarse = useMediaQuery("(pointer: coarse)");
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
   const active = enabled && !coarse && !reducedMotion;

@@ -33,6 +33,9 @@ export function BackToTop() {
   const scrollToTop = () => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+    // This button hides itself at the top, so move focus to the start of the content
+    // (#main has tabIndex -1) instead of leaving keyboard users on an invisible control.
+    document.getElementById("main")?.focus({ preventScroll: true });
   };
 
   return (
@@ -40,8 +43,8 @@ export function BackToTop() {
       type="button"
       onClick={scrollToTop}
       aria-label={ui.backToTop}
-      tabIndex={visible ? 0 : -1}
-      aria-hidden={!visible}
+      // inert removes it from the tab order and the accessibility tree while hidden.
+      inert={!visible}
       className={cn(
         "fixed bottom-6 right-6 z-50 grid size-12 place-items-center rounded-full",
         "border border-border bg-bg-alt/80 text-accent shadow-lg backdrop-blur-md",
