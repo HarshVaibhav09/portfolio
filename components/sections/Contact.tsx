@@ -25,7 +25,7 @@ export function Contact() {
                   <a
                     href={link.href}
                     {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                    className="group inline-flex items-center gap-3"
+                    className="group inline-flex min-h-11 items-center gap-3"
                   >
                     <span className="grid size-10 shrink-0 place-items-center rounded-full bg-accent/10 text-accent">
                       <SocialIcon name={link.icon} className="size-5" />

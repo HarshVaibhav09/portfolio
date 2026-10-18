@@ -24,7 +24,7 @@ export function Footer() {
         <ul className="flex items-center gap-1">
           {profile.socials.map((social) => (
             <li key={social.label}>
-              <Button href={social.href} variant="ghost" aria-label={social.label} className="size-10 p-0!">
+              <Button href={social.href} variant="ghost" aria-label={social.label} className="relative size-10 p-0! after:absolute after:-inset-0.5">
                 <SocialIcon name={social.icon} className="size-5" />
               </Button>
             </li>

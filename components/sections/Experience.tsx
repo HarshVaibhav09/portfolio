@@ -6,7 +6,7 @@ import { Achievements } from "./Achievements";
 export function Experience() {
   return (
     <Section id="experience" {...sections.experience}>
-      <ol className="relative space-y-12 border-l border-border pl-8 md:pl-10">
+      <ol className="relative max-w-3xl space-y-12 border-l border-border pl-8 md:pl-10">
         {experience.map((job) => (
           <li key={`${job.company}-${job.start}`}>
             <Reveal className="relative">

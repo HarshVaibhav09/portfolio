@@ -36,7 +36,7 @@ export function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label={theme === "dark" ? ui.switchToLight : ui.switchToDark}
-      className="group grid size-10 shrink-0 place-items-center rounded-full bg-accent/10 text-accent transition-colors hover:bg-accent/20"
+      className="group relative grid size-10 shrink-0 place-items-center rounded-full after:absolute after:-inset-0.5 bg-accent/10 text-accent transition-colors hover:bg-accent/20"
     >
       {/* Icons swap with CSS on [data-theme], so the right one shows before hydration. */}
       <span className="grid place-items-center transition-transform duration-300 group-hover:rotate-180">

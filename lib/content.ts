@@ -165,6 +165,21 @@ export const site = {
   title: "Harsh Vaibhav | Full Stack + AI Engineer",
   description: "I build LLM systems and the full stack products around them.",
   logo: "HV",
+  /** Short name used in the page-title template and Open Graph siteName. */
+  name: "Harsh Vaibhav",
+  keywords: [
+    "Harsh Vaibhav",
+    "Full Stack Engineer",
+    "AI Engineer",
+    "RAG",
+    "Multi-agent systems",
+    "LangGraph",
+    "FastAPI",
+    "React",
+    "Next.js",
+    "Bengaluru",
+  ],
+  locale: "en_IN",
 } as const;
 
 export const nav: NavItem[] = [
@@ -210,6 +225,7 @@ export const sections: Record<SectionId, SectionHeader> = {
 };
 
 export const ui = {
+  skipToContent: "Skip to content",
   backToTop: "Back to top",
   logoLabel: "Harsh Vaibhav, back to top",
   navLabel: "Primary",

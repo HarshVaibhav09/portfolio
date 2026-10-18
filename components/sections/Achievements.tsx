@@ -16,7 +16,7 @@ export function Achievements() {
       <Reveal>
         <h3 className="font-mono text-sm uppercase tracking-widest text-accent">{achievementsHeading}</h3>
       </Reveal>
-      <ul className="mt-6 grid gap-4 md:grid-cols-3">
+      <ul className="mt-6 grid gap-4 lg:grid-cols-3">
         {achievements.map((achievement, i) => {
           const Icon = icons[achievement.icon];
           return (

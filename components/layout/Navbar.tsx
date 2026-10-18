@@ -187,7 +187,7 @@ export function Navbar() {
           href="#home"
           onClick={scrollToTop}
           aria-label={ui.logoLabel}
-          className="text-gradient text-xl font-bold tracking-tight"
+          className="text-gradient relative text-xl font-bold tracking-tight after:absolute after:-inset-2"
         >
           {site.logo}
         </a>
@@ -209,7 +209,7 @@ export function Navbar() {
             aria-expanded={open}
             aria-controls={MENU_ID}
             aria-label={ui.menu}
-            className="grid size-10 place-items-center rounded-full text-text transition-colors hover:bg-bg-raised md:hidden"
+            className="relative grid size-10 place-items-center rounded-full text-text transition-colors after:absolute after:-inset-0.5 hover:bg-bg-raised md:hidden"
           >
             {open ? <X className="size-5" aria-hidden="true" /> : <Menu className="size-5" aria-hidden="true" />}
           </button>

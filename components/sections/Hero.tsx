@@ -69,29 +69,29 @@ export function Hero() {
       id="home"
       className="relative flex min-h-svh items-center overflow-x-clip pt-24 pb-24"
     >
-      <div className="mx-auto grid w-full max-w-[1200px] items-center gap-10 px-4 md:grid-cols-[1.2fr_1fr] md:gap-12 md:px-8">
-        {/* Photo: first on mobile, right column on desktop */}
-        <div className="hero-rise order-first flex justify-center md:order-last" style={{ "--d": 0 } as Vars}>
-          <div className="relative size-44 sm:size-52 md:size-80 lg:size-96">
-            <div
-              aria-hidden="true"
-              className="absolute -inset-6 rounded-full opacity-30 blur-3xl [background-image:var(--gradient-brand)]"
-            />
-            <div aria-hidden="true" className="hero-ring absolute inset-0 rounded-full" />
+      <div className="mx-auto grid w-full max-w-[1200px] items-center gap-10 px-4 md:px-8 lg:grid-cols-[1.2fr_1fr] lg:gap-12">
+        {/* Photo: first on mobile, right column on desktop. The photo is the LCP element, so it
+            renders immediately; only the glow and ring fade in (fading the photo delayed LCP ~1s). */}
+        <div className="order-first flex justify-center lg:order-last">
+          <div className="relative size-44 sm:size-52 md:size-64 lg:size-80 xl:size-96">
+            <div aria-hidden="true" className="hero-rise absolute inset-0" style={{ "--d": 0 } as Vars}>
+              <div className="absolute -inset-6 rounded-full opacity-30 blur-3xl [background-image:var(--gradient-brand)]" />
+              <div className="hero-ring absolute inset-0 rounded-full" />
+            </div>
             <div className="absolute inset-1 overflow-hidden rounded-full bg-bg md:inset-1.5">
               <Image
                 src={profile.photo.src}
                 alt={profile.photo.alt}
                 fill
-                priority
-                sizes="(min-width: 1024px) 384px, (min-width: 768px) 320px, (min-width: 640px) 208px, 176px"
+                preload
+                sizes="(min-width: 1280px) 384px, (min-width: 1024px) 320px, (min-width: 768px) 256px, (min-width: 640px) 208px, 176px"
                 className="object-cover"
               />
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col items-center gap-6 text-center md:items-start md:text-left">
+        <div className="flex flex-col items-center gap-6 text-center lg:items-start lg:text-left">
           <p
             className="hero-rise inline-flex items-center gap-2.5 rounded-full border border-border bg-bg-alt/60 px-4 py-1.5 font-mono text-xs text-muted backdrop-blur-[10px] sm:text-sm"
             style={{ "--d": 0 } as Vars}
@@ -117,7 +117,7 @@ export function Hero() {
             {profile.description}
           </p>
 
-          <div className="hero-rise flex flex-wrap justify-center gap-3 md:justify-start" style={afterHeadline(2)}>
+          <div className="hero-rise flex flex-wrap justify-center gap-3 lg:justify-start" style={afterHeadline(2)}>
             <Button href="#work" variant="gradient">
               {hero.cta.work}
             </Button>
@@ -131,7 +131,7 @@ export function Hero() {
           </div>
 
           <div
-            className="hero-rise flex flex-wrap items-center justify-center gap-x-5 gap-y-3 text-sm text-muted md:justify-start"
+            className="hero-rise flex flex-wrap items-center justify-center gap-x-5 gap-y-3 text-sm text-muted lg:justify-start"
             style={afterHeadline(3)}
           >
             <span className="inline-flex items-center gap-1.5">
@@ -145,7 +145,7 @@ export function Hero() {
                     href={social.href}
                     variant="ghost"
                     aria-label={social.label}
-                    className="size-10 p-0!"
+                    className="relative size-10 p-0! after:absolute after:-inset-0.5"
                   >
                     <SocialIcon name={social.icon} className="size-5" />
                   </Button>
@@ -155,11 +155,11 @@ export function Hero() {
           </div>
 
           <dl
-            className="hero-rise mt-2 flex flex-wrap justify-center gap-x-8 gap-y-4 border-t border-border pt-6 md:justify-start"
+            className="hero-rise mt-2 flex flex-wrap justify-center gap-x-8 gap-y-4 border-t border-border pt-6 lg:justify-start"
             style={afterHeadline(4)}
           >
             {profile.stats.map((stat) => (
-              <div key={stat.label} className="flex flex-col-reverse items-center md:items-start">
+              <div key={stat.label} className="flex flex-col-reverse items-center lg:items-start">
                 <dt className="font-mono text-xs text-muted">{stat.label}</dt>
                 <dd className="text-2xl font-semibold text-text">{stat.value}</dd>
               </div>
@@ -171,7 +171,7 @@ export function Hero() {
       <a
         href="#about"
         aria-label={hero.scrollLabel}
-        className="hero-rise absolute bottom-6 left-1/2 grid size-10 -translate-x-1/2 place-items-center rounded-full border border-border text-muted transition-colors hover:border-accent/40 hover:text-accent"
+        className="hero-rise after:absolute after:-inset-0.5 absolute bottom-6 left-1/2 grid size-10 -translate-x-1/2 place-items-center rounded-full border border-border text-muted transition-colors hover:border-accent/40 hover:text-accent"
         style={afterHeadline(5)}
       >
         <ChevronDown className="size-5 animate-bounce motion-reduce:animate-none" aria-hidden="true" />

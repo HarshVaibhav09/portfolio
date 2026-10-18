@@ -14,16 +14,19 @@
   --bg-raised: #252541;
   --border: rgb(255 255 255 / 0.08);
   --text: #f5f5f7;
-  --muted: #a8a8b3;
+  --muted: #b0b0bc; /* was #a8a8b3: lifted so muted text stays >= 4.5:1 over the orbs */
   --accent: #ff8e53;
   --accent-2: #00d4ff;
   --coral: #ff6b6b;
   --gold: #ffd93d;
-  --orb-opacity: 0.4;
+  --orb-opacity: 0.32; /* was 0.4: keeps body text AA where it sits over an orb */
   --glare: rgb(255 255 255 / 0.1);
   --success: #4ade80; /* form feedback only */
   --danger: #ff8787;
   --gradient-brand: linear-gradient(135deg, #ff8e53 0%, #ff6b6b 50%, #00d4ff 100%);
+  /* Gradient for TEXT (hero name, logo). Built from the theme tokens, so light mode gets the
+     darker AA accents; the brand hex values only pass contrast on the dark background. */
+  --gradient-text: linear-gradient(90deg, var(--accent) 0%, var(--coral) 50%, var(--accent-2) 100%);
   color-scheme: dark;
 }
 
@@ -34,11 +37,11 @@
   --border: rgb(26 26 46 / 0.1);
   --text: #1a1a2e;
   --muted: #4a5568;
-  --accent: #d9480f;
-  --accent-2: #0891b2;
+  --accent: #c2410c; /* was #d9480f (4.6:1 on white, under 4.5 over orbs/cards) */
+  --accent-2: #0e7490; /* was #0891b2, only 3.7:1 on white */
   --coral: #e03131;
   --gold: #f59f00;
-  --orb-opacity: 0.25;
+  --orb-opacity: 0.18; /* was 0.25 */
   --glare: rgb(217 72 15 / 0.08);
   --success: #237032; /* darker in light mode so text passes AA on white */
   --danger: #c92a2a;
@@ -69,7 +72,7 @@
    4. Custom utility: gradient text (hero name, logo)
    ------------------------------------------------------------------ */
 @utility text-gradient {
-  background-image: var(--gradient-brand);
+  background-image: var(--gradient-text);
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
@@ -219,7 +222,7 @@
    So each letter clips its own background, and shows slice --j of --n of one horizontal
    brand gradient. Adjacent slices meet exactly, so it reads as one gradient across the name. */
 .hero-name-letter {
-  background-image: linear-gradient(90deg, #ff8e53 0%, #ff6b6b 50%, #00d4ff 100%);
+  background-image: var(--gradient-text);
   background-size: calc(var(--n) * 100%) 100%;
   background-position: calc(var(--j) / (var(--n) - 1) * 100%) 0;
   background-clip: text;

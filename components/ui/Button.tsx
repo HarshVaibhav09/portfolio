@@ -10,7 +10,8 @@ const base =
 
 const variants: Record<Variant, string> = {
   gradient:
-    "text-white shadow-lg shadow-accent/20 hover:shadow-accent/40 [background-image:var(--gradient-brand)]",
+    // Dark navy text: white on #FF8E53 → #00D4FF is only ~1.6–2.6:1. Navy is 7:1+ on every stop.
+    "text-[#0F0F1E] shadow-lg shadow-accent/20 hover:shadow-accent/40 [background-image:var(--gradient-brand)]",
   outline: "border border-accent/60 text-accent hover:border-accent hover:bg-accent/10",
   ghost: "text-text hover:bg-bg-raised hover:text-accent",
 };
@@ -19,7 +20,7 @@ type Size = "md" | "sm";
 
 const sizes: Record<Size, string> = {
   md: "px-6 py-3",
-  sm: "px-4 py-2",
+  sm: "min-h-11 px-4 py-2", // 44px tall: comfortable tap target
 };
 
 interface CommonProps {

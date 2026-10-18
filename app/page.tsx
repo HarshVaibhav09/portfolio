@@ -1,5 +1,4 @@
 import { GradientOrbs } from "@/components/background/GradientOrbs";
-import { BackToTop } from "@/components/layout/BackToTop";
 import { ScrollProgress } from "@/components/layout/ScrollProgress";
 import { About } from "@/components/sections/About";
 import { Contact } from "@/components/sections/Contact";
@@ -13,7 +12,7 @@ export default function Home() {
     <>
       <GradientOrbs />
       <ScrollProgress />
-      <main>
+      <main id="main" tabIndex={-1} className="outline-none">
         <Hero />
         <About />
         <Work />
@@ -21,7 +20,6 @@ export default function Home() {
         <Experience />
         <Contact />
       </main>
-      <BackToTop />
     </>
   );
 }
