@@ -5,9 +5,9 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { Resend } from "resend";
 import { contact } from "@/lib/content";
+import { buildContactEmail } from "@/lib/email/contact-email";
 import { contactSchema, invalidResult, readContactForm, type ContactResult } from "@/lib/schemas/contact";
 
-const FROM = "Portfolio <onboarding@resend.dev>";
 const REQUIRED_ENV = [
   "RESEND_API_KEY",
   "CONTACT_TO_EMAIL",
@@ -93,16 +93,16 @@ export async function sendContact(_prev: ContactResult, formData: FormData): Pro
     return fail(contact.errors.unavailable, input);
   }
 
-  // 5. Send. Plain text only: user input never becomes HTML.
-  const f = contact.fields;
+  // 5. Send. HTML + plain-text versions; every user value is escaped inside buildContactEmail.
+  const mail = buildContactEmail({ name, email, message, receivedAt: new Date() });
   try {
     const { error } = await new Resend(env.RESEND_API_KEY).emails.send({
-      from: FROM,
+      from: contact.notificationEmail.from,
       to: env.CONTACT_TO_EMAIL,
       replyTo: email,
-      // Newlines in a subject could break the header, so flatten them.
-      subject: `${contact.emailSubjectPrefix} ${name.replace(/[\r\n]+/g, " ")}`,
-      text: `${f.name.label}: ${name}\n${f.email.label}: ${email}\n\n${message}`,
+      subject: mail.subject,
+      html: mail.html,
+      text: mail.text,
     });
     if (error) {
       console.error("[contact] resend error", error);

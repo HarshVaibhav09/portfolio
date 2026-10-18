@@ -297,7 +297,14 @@ export const contact = {
     messageShort: "Please write at least 10 characters.",
     messageLong: "Please keep your message under 2,000 characters.",
   },
-  emailSubjectPrefix: "Portfolio contact from",
+  /** The notification email I receive for each message (lib/email/contact-email.ts). */
+  notificationEmail: {
+    from: "Harsh's Portfolio <onboarding@resend.dev>",
+    /** {name} is replaced with the visitor's name. */
+    subject: "New message from {name} via your portfolio",
+    heading: "New portfolio message",
+    labels: { name: "Name", email: "Email", message: "Message", received: "Received" },
+  },
 } as const;
 
 export const footer = {
