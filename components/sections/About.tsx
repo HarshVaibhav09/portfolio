@@ -31,12 +31,14 @@ export function About() {
               {about.facts.map((fact) => {
                 const Icon = factIcons[fact.icon];
                 return (
-                  <div key={fact.label} className="flex items-start gap-3">
-                    <Icon className="mt-0.5 size-5 shrink-0 text-accent-2" aria-hidden="true" />
-                    <div>
-                      <dt className="font-mono text-xs uppercase tracking-wider text-muted">{fact.label}</dt>
-                      <dd className="mt-0.5 text-text">{fact.value}</dd>
-                    </div>
+                  // A dl allows only one div around each dt/dd group, so the icon sits inside
+                  // the dt (absolutely placed) instead of in a second wrapper.
+                  <div key={fact.label} className="relative pl-8">
+                    <dt className="font-mono text-xs uppercase tracking-wider text-muted">
+                      <Icon className="absolute top-0.5 left-0 size-5 text-accent-2" aria-hidden="true" />
+                      {fact.label}
+                    </dt>
+                    <dd className="mt-0.5 text-text">{fact.value}</dd>
                   </div>
                 );
               })}

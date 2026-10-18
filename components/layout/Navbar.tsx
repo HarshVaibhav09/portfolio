@@ -176,7 +176,8 @@ export function Navbar() {
       ref={headerRef}
       className={cn(
         "fixed inset-x-0 top-0 z-50 border-b border-accent/10 backdrop-blur-[20px] transition-[background-color,box-shadow] duration-300",
-        scrolled ? "bg-bg-alt/95 shadow-lg shadow-black/20" : "bg-bg-alt/80",
+        // 20% black reads as a gray band on white, so light mode gets a softer shadow.
+        scrolled ? "bg-bg-alt/95 shadow-lg shadow-black/6 dark:shadow-black/20" : "bg-bg-alt/80",
       )}
     >
       <nav

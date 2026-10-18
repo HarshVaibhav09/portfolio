@@ -20,7 +20,7 @@ const SPEED_RECOVERY = 1.5; // how fast pushed particles ease back to drift spee
 const MAX_DT = 0.05; // clamp so a tab switch or long frame never teleports particles
 
 // Particle colors come from the --accent / --accent-2 tokens in globals.css, so they track
-// the theme exactly (#FF8E53 / #00D4FF dark, #C2410C / #0E7490 light).
+// the theme exactly (#FF8E53 / #00D4FF dark, #B43A0A / #0E7490 light).
 const THEME_STYLE: Record<Theme, { blending: THREE.Blending; pointOpacity: number; lineOpacity: number }> = {
   dark: { blending: THREE.AdditiveBlending, pointOpacity: 0.7, lineOpacity: 0.22 },
   light: { blending: THREE.NormalBlending, pointOpacity: 0.45, lineOpacity: 0.15 },

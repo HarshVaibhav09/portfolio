@@ -19,7 +19,7 @@
   --accent-2: #00d4ff;
   --coral: #ff6b6b;
   --gold: #ffd93d;
-  --orb-opacity: 0.32; /* was 0.4: keeps body text AA where it sits over an orb */
+  --orb-opacity: 0.28; /* was 0.4, then 0.32: keeps accent labels AA where they sit over an orb */
   --glare: rgb(255 255 255 / 0.1);
   --success: #4ade80; /* form feedback only */
   --danger: #ff8787;
@@ -37,7 +37,7 @@
   --border: rgb(26 26 46 / 0.1);
   --text: #1a1a2e;
   --muted: #4a5568;
-  --accent: #c2410c; /* was #d9480f (4.6:1 on white, under 4.5 over orbs/cards) */
+  --accent: #b43a0a; /* was #d9480f, then #c2410c (4.4:1 over the cyan orb). 5.9:1 on white */
   --accent-2: #0e7490; /* was #0891b2, only 3.7:1 on white */
   --coral: #e03131;
   --gold: #f59f00;
@@ -177,6 +177,17 @@
     height: 220px;
     margin: -110px 0 0 -110px;
   }
+}
+
+/* The constellation mounts late (BackgroundCanvasLoader), so it fades in rather than pops. */
+@keyframes canvas-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.canvas-fade-in {
+  animation: canvas-fade-in 0.8s ease-out;
 }
 
 /* ------------------------------------------------------------------

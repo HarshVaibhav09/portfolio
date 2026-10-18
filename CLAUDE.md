@@ -32,6 +32,8 @@ components/
 hooks/useTilt.ts              # 3D tilt for project cards
 lib/content.ts                # typed, single source of truth for all copy
 lib/schemas/contact.ts        # zod schema shared by form and Server Action
+lib/schemas/contact-form.ts   # zod-free limits, types and form reading (client-safe)
+lib/motion-features.ts        # domAnimation, lazy-loaded by LazyMotion
 lib/utils.ts
 public/images/harsh.jpg       # profile photo (square)
 public/resume.pdf
@@ -62,13 +64,16 @@ Default theme is dark. Theme is set by `data-theme` on <html>.
 | --bg-raised    | #252541                  | #E9ECEF                | inputs, hovered surfaces |
 | --border       | rgba(255,255,255,0.08)   | rgba(26,26,46,0.10)    | hairlines |
 | --text         | #F5F5F7                  | #1A1A2E                | body text |
-| --muted        | #A8A8B3                  | #4A5568                | secondary text |
-| --accent       | #FF8E53 (warm orange)    | #D9480F                | primary accent: buttons, links, active states |
-| --accent-2     | #00D4FF (cyan)           | #0891B2                | secondary accent: highlights, focus, small details |
+| --muted        | #B0B0BC                  | #4A5568                | secondary text |
+| --accent       | #FF8E53 (warm orange)    | #B43A0A                | primary accent: buttons, links, active states |
+| --accent-2     | #00D4FF (cyan)           | #0E7490                | secondary accent: highlights, focus, small details |
 | --coral        | #FF6B6B                  | #E03131                | gradients only |
 | --gold         | #FFD93D                  | #F59F00                | orbs only, never text |
 
-Light-mode accents are darker on purpose so text passes WCAG AA on white.
+Light-mode accents are darker on purpose so text passes WCAG AA on white and over the orbs
+(--accent 5.9:1, --accent-2 5.4:1 on white). Dark --muted is lifted from #A8A8B3 for the same
+reason. Contrast is verified by sampling rendered pixels, because axe cannot see through the
+orbs, backdrop blur or the canvas. Re-check both themes after changing any token or orb.
 
 Gradients:
 - `--gradient-brand`: linear-gradient(135deg, #FF8E53 0%, #FF6B6B 50%, #00D4FF 100%)
@@ -82,7 +87,8 @@ Gradients:
    - orb 1: 500px, cyan gradient (#00D4FF to #0099FF), top -10% right -10%
    - orb 2: 400px, coral to orange (#FF6B6B to #FF8E53), bottom -10% left -10%
    - orb 3: 350px, gold to coral (#FFD93D to #FF6B6B), centered
-   - all: border-radius 50%, filter blur(80px), opacity 0.4 (0.25 in light mode),
+   - all: border-radius 50%, filter blur(80px), opacity 0.28 (0.18 in light mode; lowered
+     from 0.4 / 0.25 so accent labels stay AA where they sit over an orb),
      slow 20s float animation with staggered delays (0s, 7s, 14s)
    - mobile: smaller sizes and blur(60px); reduced motion: no animation
 3. Particle constellation (NeuralField via BackgroundCanvas), full viewport, fixed,
@@ -120,8 +126,11 @@ Left column, top to bottom:
 5. CTAs: View work (gradient, primary), Download resume (outline), Contact (ghost)
 6. Location (Bengaluru) + social icon links (GitHub, LinkedIn, Email)
 7. Stats row: 3 small stats from content.ts
-Right column: circular photo (next/image, priority) inside a rotating conic gradient ring
-(--gradient-brand colors, 20s linear rotation), subtle glow behind it.
+Right column: circular photo (next/image with `preload` and `fetchPriority="high"`) inside a
+rotating conic gradient ring (--gradient-brand colors, 20s linear rotation), subtle glow behind it.
+LCP decision: the photo is the LCP element, so it renders immediately and is never faded or
+animated in; only the ring and glow fade in (fading the photo delayed LCP by about 1s). In
+Next 16 `preload` replaces `priority` but no longer implies high fetch priority, so set both.
 Small scroll indicator at the bottom center.
 
 ### Skills
@@ -138,7 +147,14 @@ NO percentages, NO progress bars, NO descriptions.
   no typing effect (show the first word statically).
 - Exactly ONE WebGL render loop on the page (the background constellation).
 - Canvas: dpr clamped to [1, 2] (1.5 max on mobile), fewer particles on mobile,
-  pause when the tab is hidden.
+  pause when the tab is hidden. It mounts late and fades in: desktop after load + idle,
+  phones (<=768px or coarse pointer) on the first scroll/touch/key press, because three.js
+  startup costs a phone about 250ms of blocking time.
+- motion: use `m` components, never `motion.*`. Reveal wraps `m` in `LazyMotion` with
+  `domAnimation` loaded from `lib/motion-features.ts`. The full `motion` component ships
+  layout/drag/projection code in first-load JS.
+- Keep zod out of first-load JS: client code imports `lib/schemas/contact-form.ts` and
+  loads `lib/schemas/contact.ts` (the zod schema) with `import()`.
 - Tilt cards: disabled on touch devices. Max rotation about 8 degrees, spring-smoothed.
 - Section reveals: short fade + 16px translate, once per element, 0.5s.
 - Target Lighthouse: Performance 90+ on mobile, Accessibility 95+.

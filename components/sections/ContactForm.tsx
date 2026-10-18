@@ -6,22 +6,24 @@ import { sendContact } from "@/app/actions/contact";
 import { Button } from "@/components/ui/Button";
 import { contact } from "@/lib/content";
 import {
-  contactSchema,
   initialContactResult,
-  invalidResult,
   MESSAGE_MAX,
   NAME_MAX,
   readContactForm,
   type ContactField,
   type ContactResult,
-} from "@/lib/schemas/contact";
+} from "@/lib/schemas/contact-form";
 import { cn } from "@/lib/utils";
 
 const FIELDS: ContactField[] = ["name", "email", "message"];
 
 const inputClass =
-  "w-full rounded-xl border border-border bg-bg-raised/60 px-4 py-3 text-text placeholder:text-muted/70 " +
+  "w-full rounded-xl border border-border bg-bg-raised/60 px-4 py-3 text-text placeholder:text-muted " +
   "transition-colors hover:border-accent/40 aria-invalid:border-danger";
+
+// The schema pulls in zod, so it loads on demand instead of with the page. Prefetched when
+// the visitor first focuses the form, so it is normally ready by the time they submit.
+const loadSchema = () => import("@/lib/schemas/contact");
 
 // Validate in the browser with the same schema first (instant feedback, no round trip),
 // then let the Server Action validate again and send.
@@ -29,6 +31,7 @@ async function validateThenSend(prev: ContactResult, formData: FormData): Promis
   const input = readContactForm(formData);
   // A filled honeypot goes straight to the server, which quietly drops it.
   if (!input.website) {
+    const { contactSchema, invalidResult } = await loadSchema();
     const parsed = contactSchema.safeParse(input);
     if (!parsed.success) return invalidResult(parsed.error, input);
   }
@@ -94,7 +97,13 @@ export function ContactForm() {
   return (
     // noValidate: the schema's messages replace the browser's bubbles; required/type stay for semantics.
     // React resets the form after each submit; on failure `values` refill it, on success it stays empty.
-    <form ref={formRef} action={formAction} noValidate className="relative space-y-5">
+    <form
+      ref={formRef}
+      action={formAction}
+      onFocus={() => void loadSchema()}
+      noValidate
+      className="relative space-y-5"
+    >
       <div className="grid gap-5 sm:grid-cols-2">
         <Field name="name" autoComplete="name" maxLength={NAME_MAX} error={errorFor("name")} defaultValue={state.values?.name} />
         <Field name="email" type="email" autoComplete="email" error={errorFor("email")} defaultValue={state.values?.email} />

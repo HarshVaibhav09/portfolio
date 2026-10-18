@@ -25,7 +25,7 @@ export default function BackgroundCanvas() {
   const frameloop = hidden ? "never" : reducedMotion ? "demand" : "always";
 
   return (
-    <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-[5]">
+    <div aria-hidden="true" className="canvas-fade-in pointer-events-none fixed inset-0 -z-[5]">
       <Canvas
         dpr={isMobile ? [1, 1.5] : [1, 2]}
         gl={{ alpha: true, powerPreference: "low-power" }}

@@ -84,6 +84,9 @@ export function Hero() {
                 alt={profile.photo.alt}
                 fill
                 preload
+                // Next 16's `preload` no longer implies high priority (the old `priority` did).
+                // Without it the LCP image is fetched at Low, behind the JS chunks.
+                fetchPriority="high"
                 sizes="(min-width: 1280px) 384px, (min-width: 1024px) 320px, (min-width: 768px) 256px, (min-width: 640px) 208px, 176px"
                 className="object-cover"
               />

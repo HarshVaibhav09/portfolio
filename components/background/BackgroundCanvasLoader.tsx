@@ -7,10 +7,17 @@ import dynamic from "next/dynamic";
 // server render and the initial JS bundle.
 const BackgroundCanvas = dynamic(() => import("./BackgroundCanvas"), { ssr: false });
 
+// Phones: slow CPUs, and nothing to react to until a touch anyway.
+const PHONE_QUERY = "(max-width: 768px), (pointer: coarse)";
+const FIRST_INTERACTION = ["scroll", "touchstart", "pointerdown", "keydown"] as const;
+
 /**
- * Mounts the canvas only after the page has loaded and the browser is idle. The three.js
- * chunk (~900 KB unminified) then never competes with the hero image (the LCP element),
- * fonts or hydration for bandwidth and main-thread time. The dynamic import starts on mount.
+ * Mounts the canvas late so the three.js chunk (~900 KB unminified) never competes with the
+ * hero image (the LCP element), fonts or hydration. The dynamic import starts on mount.
+ * - Desktop: once the page has loaded and the browser is idle.
+ * - Phones: on the first scroll, touch or key press. Parsing three.js and starting WebGL
+ *   costs a phone ~250 ms of main thread (measured as Total Blocking Time), so it waits
+ *   until the visitor is engaging with the page rather than landing on it.
  */
 export function BackgroundCanvasLoader() {
   const [ready, setReady] = useState(false);
@@ -18,6 +25,15 @@ export function BackgroundCanvasLoader() {
   useEffect(() => {
     let idleId: number | undefined;
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    if (window.matchMedia(PHONE_QUERY).matches) {
+      const onFirst = () => setReady(true);
+      const opts = { once: true, passive: true } as const;
+      for (const type of FIRST_INTERACTION) window.addEventListener(type, onFirst, opts);
+      return () => {
+        for (const type of FIRST_INTERACTION) window.removeEventListener(type, onFirst);
+      };
+    }
 
     const schedule = () => {
       if ("requestIdleCallback" in window) {

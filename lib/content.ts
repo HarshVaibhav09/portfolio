@@ -227,7 +227,8 @@ export const sections: Record<SectionId, SectionHeader> = {
 export const ui = {
   skipToContent: "Skip to content",
   backToTop: "Back to top",
-  logoLabel: "Harsh Vaibhav, back to top",
+  /** Starts with the visible "HV" so voice-control users can say what they see (WCAG 2.5.3). */
+  logoLabel: "HV, Harsh Vaibhav, back to top",
   navLabel: "Primary",
   menu: "Menu",
   switchToLight: "Switch to light theme",
